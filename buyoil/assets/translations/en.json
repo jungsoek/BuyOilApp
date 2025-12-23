@@ -1,0 +1,20 @@
+{
+  "startButton": "Touch to start",
+  "exitApp": "Exit",
+  "enterPhoneNumber": "Enter the phone number",
+  "enterButton": "Enter",
+  "doorOpening": "Opening door",
+  "openAction": "Open",
+  "closeAction": "Close",
+  "okayButton": "Okay",
+  "recheckButton": "Recheck",
+  "settingsMenu": "Settings",
+  "oilContainerLabel": "Oil Container",
+  "measurementLabel": "Measurement",
+  "motorLabel": "Motor",
+  "valveLabel": "Valve",
+  "stopButton": "Stop",
+  "step": "Step",
+  "checkValidationToast": "Please enter the valid phone number again",
+  "showTheProverDriverCode": "Please shows the proper driver code"
+}

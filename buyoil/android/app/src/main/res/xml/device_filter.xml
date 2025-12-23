@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    전체 기기 허용      -->
+    <!--    <usb-device />   -->
+
+    <!--
+       이 파일은 Android가 특정 USB 장치가 연결되었을 때
+       앱을 자동으로 실행하거나 권한을 요청하도록 하는 필터 목록입니다.
+       vendor-id와 product-id는 10진수(Decimal)로 작성해야 합니다.
+   -->
+
+    <!--
+        장치 1: Silicon Labs CP210x 계열
+        - Vendor ID (Hex): 10C4
+        - Vendor ID (Decimal): 4292
+        (Product ID는 지정하지 않아 해당 공급업체의 모든 장치를 대상으로 함)
+    -->
+    <usb-device vendor-id="4292" />
+
+    <!--
+        장치 2: Arduino 계열 (CDC)
+        - Vendor ID (Hex): 2341
+        - Vendor ID (Decimal): 9025
+        (Product ID는 지정하지 않아 해당 공급업체의 모든 장치를 대상으로 함)
+    -->
+    <usb-device vendor-id="9025" />
+
+<!--    &lt;!&ndash; 0x0403 / 0x6001: FTDI FT232R UART &ndash;&gt;-->
+<!--    <usb-device vendor-id="1027" product-id="24577" />-->
+
+<!--    &lt;!&ndash; 0x0403 / 0x6015: FTDI FT231X &ndash;&gt;-->
+<!--    <usb-device vendor-id="1027" product-id="24597" />-->
+
+<!--    &lt;!&ndash; 0x2341 / Arduino &ndash;&gt;-->
+<!--    <usb-device vendor-id="9025" />-->
+
+<!--    &lt;!&ndash; 0x16C0 / 0x0483: Teensyduino  &ndash;&gt;-->
+<!--    <usb-device vendor-id="5824" product-id="1155" />-->
+
+<!--    &lt;!&ndash; 0x10C4 / 0xEA60: CP210x UART Bridge &ndash;&gt;-->
+<!--    <usb-device vendor-id="4292" product-id="60000" />-->
+
+<!--    &lt;!&ndash; 0x067B / 0x2303: Prolific PL2303 &ndash;&gt;-->
+<!--    <usb-device vendor-id="1659" product-id="8963" />-->
+
+<!--    &lt;!&ndash; 0x1366 / 0x0105: Segger JLink &ndash;&gt;-->
+<!--    <usb-device vendor-id="4966" product-id="261" />-->
+
+<!--    &lt;!&ndash; 0x1366 / 0x0105: CH340 JLink &ndash;&gt;-->
+<!--    <usb-device vendor-id="1A86" product-id="7523" />-->
+</resources>

@@ -1,0 +1,20 @@
+{
+  "startButton": "開始",
+  "exitApp": "終了",
+  "enterPhoneNumber": "電話番号を入力",
+  "enterButton": "入力",
+  "doorOpening": "ドアを開ける途中",
+  "openAction": "開く",
+  "closeAction": "閉じる",
+  "okayButton": "オーケー / 確認",
+  "recheckButton": "再確認",
+  "settingsMenu": "設定",
+  "oilContainerLabel": "油容器",
+  "measurementLabel": "測定",
+  "motorLabel": "モーター",
+  "valveLabel": "バルブ",
+  "stopButton": "停止",
+  "step": "Step",
+  "checkValidationToast": "Please enter the valid phone number again",
+  "showTheProverDriverCode": "Please shows the proper driver code"
+}

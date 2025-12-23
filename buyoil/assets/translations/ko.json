@@ -1,0 +1,20 @@
+{
+  "startButton": "시작",
+  "exitApp": "종료 / 나가기",
+  "enterPhoneNumber": "전화번호 입력",
+  "enterButton": "입력",
+  "doorOpening": "문 열림",
+  "openAction": "열기",
+  "closeAction": "닫기",
+  "okayButton": "확인",
+  "recheckButton": "재확인",
+  "settingsMenu": "설정",
+  "oilContainerLabel": "오일 용기",
+  "measurementLabel": "측정",
+  "motorLabel": "모터",
+  "valveLabel": "밸브",
+  "stopButton": "정지",
+  "step": "Step",
+  "checkValidationToast": "Please enter the valid phone number again",
+  "showTheProverDriverCode": "Please shows the proper driver code"
+}

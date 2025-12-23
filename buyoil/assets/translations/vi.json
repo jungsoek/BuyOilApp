@@ -1,0 +1,20 @@
+{
+  "startButton": "Bắt đầu",
+  "exitApp": "Thoát",
+  "enterPhoneNumber": "Nhập số điện thoại",
+  "enterButton": "Vào",
+  "doorOpening": "Đang mở cửa",
+  "openAction": "Mở",
+  "closeAction": "Đóng",
+  "okayButton": "Đồng ý / OK",
+  "recheckButton": "Kiểm tra lại",
+  "settingsMenu": "Cài đặt",
+  "oilContainerLabel": "Thùng dầu",
+  "measurementLabel": "Đo lường",
+  "motorLabel": "Động cơ",
+  "valveLabel": "Van",
+  "stopButton": "Dừng",
+  "step": "Step",
+  "checkValidationToast": "Please enter the valid phone number again",
+  "showTheProverDriverCode": "Please shows the proper driver code"
+}

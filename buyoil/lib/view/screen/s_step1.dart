@@ -29,17 +29,16 @@ class Step1Screen extends ConsumerStatefulWidget {
 class Step1ScreenState extends ConsumerState<Step1Screen> {
 
   void _onRfidDetected(String uid) {
-    print('[RFID UID]: $uid');
-
+    print('[RFID UID by _onRfidDetected]: $uid');
     print('RAW UID: "$uid"');
     print('Length: ${uid.length}');
     for (final c in uid.codeUnits) {
       print('0x${c.toRadixString(16)}');
     }
 
-    if (uid.length == 10) {
-      ref.read(step1Provider.notifier).rfidAuthenticated(uid);
-    }
+    // if (uid.length == 10) {
+    //   ref.read(step1Provider.notifier).rfidAuthenticated(uid);
+    // }
   }
 
   @override

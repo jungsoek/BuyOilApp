@@ -42,6 +42,8 @@ dependencies:
   usb_serial: ^0.5.2
   fluttertoast: ^9.0.0
   hid: ^0.0.6
+  http: ^1.2.0
+  dio: 5.4.0
 
 
 dev_dependencies:

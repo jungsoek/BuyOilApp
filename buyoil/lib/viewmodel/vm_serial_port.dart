@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:buyoil/viewmodel/vm_sendUser.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:usb_serial/usb_serial.dart';
 
@@ -372,6 +373,17 @@ class SerialPortVM extends _$SerialPortVM {
       print("[DEBUG] writeToPort: ${phoneCommand}");
       String packet = "$phoneCommand#";
       final dataToSend = Uint8List.fromList(packet.codeUnits);
+
+      final fetchResult = await fetchData(phoneCommand);
+
+      if(fetchResult != null) {
+        print('[userId] : ${fetchResult.userId}');
+        print('[driver] : ${fetchResult.driver}');
+        ref.read(step1Provider.notifier).rfidAuthenticated(phoneCommand);
+      } else {
+        print('Fetch fail_vm_serial_port.dart_418');
+      }
+
       write(dataToSend);
     }
 
@@ -380,12 +392,23 @@ class SerialPortVM extends _$SerialPortVM {
       state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
       String packet = "$phoneCommand#";
       final dataToSend = Uint8List.fromList(packet.codeUnits);
+
+      final fetchResult = await fetchData(phoneCommand);
+
+      if(fetchResult != null) {
+        print('[userId] : ${fetchResult.userId}');
+        print('[driver] : ${fetchResult.driver}');
+        ref.read(step1Provider.notifier).rfidAuthenticated(phoneCommand);
+      } else {
+        print('Fetch fail_vm_serial_port.dart_392');
+      }
+
       write(dataToSend);
     } else {
       if(context != null && context.mounted) {
         showToastMessage(context, "Port not connected");
       }
-    } 
+    }
   }
 
   Future<void> writeToPortRFID(String rfidCommand, {BuildContext? context}) async {
@@ -398,6 +421,17 @@ class SerialPortVM extends _$SerialPortVM {
       print("[DEBUG] writeToPort: ${rfidCommand}");
       String packet = "$rfidCommand#";
       final dataToSend = Uint8List.fromList(packet.codeUnits);
+
+      final fetchResult = await fetchData(rfidCommand);
+
+      if(fetchResult != null) {
+        print('[userId] : ${fetchResult.userId}');
+        print('[driver] : ${fetchResult.driver}');
+        ref.read(step1Provider.notifier).rfidAuthenticated(rfidCommand);
+      } else {
+        print('Fetch fail_vm_serial_port.dart_418');
+      }
+
       write(dataToSend);
     }
 
@@ -406,6 +440,17 @@ class SerialPortVM extends _$SerialPortVM {
       state = state.copyWith(lastCommand: PORT_COMMANDS.cmdRFID);
       String packet = "$rfidCommand#";
       final dataToSend = Uint8List.fromList(packet.codeUnits);
+
+      final fetchResult = await fetchData(rfidCommand);
+
+      if(fetchResult != null) {
+        print('[userId] : ${fetchResult.userId}');
+        print('[driver] : ${fetchResult.driver}');
+        ref.read(step1Provider.notifier).rfidAuthenticated(rfidCommand);
+      } else {
+        print('Fetch fail_vm_serial_port.dart_418');
+      }
+
       write(dataToSend);
     } else {
       if(context != null && context.mounted) {

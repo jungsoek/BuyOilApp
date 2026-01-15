@@ -1,3 +1,4 @@
+import 'package:buyoil/viewmodel/vm_sendUser.dart';
 import 'package:buyoil/viewmodel/vm_serial_port.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -39,6 +40,7 @@ class Step1 extends _$Step1 {
           0,
           state.phoneNumber.length - 1,
         );
+
         state = state.copyWith(phoneNumber: updated);
       }
       return;
@@ -66,3 +68,5 @@ class Step1 extends _$Step1 {
     });
   }
 }
+
+

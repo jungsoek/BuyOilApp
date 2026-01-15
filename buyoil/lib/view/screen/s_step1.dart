@@ -36,13 +36,14 @@ class Step1ScreenState extends ConsumerState<Step1Screen> {
       print('0x${c.toRadixString(16)}');
     }
 
-    // if (uid.length == 10) {
-    //   ref.read(step1Provider.notifier).rfidAuthenticated(uid);
-    // }
+    if (uid.length == 10) {
+      ref.read(step1Provider.notifier).rfidAuthenticated(uid);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
     final state = ref.watch(step1Provider);
 
     return Scaffold(
@@ -65,6 +66,7 @@ class Step1ScreenState extends ConsumerState<Step1Screen> {
           ),
         ],
       ),
+
     );
   }
 

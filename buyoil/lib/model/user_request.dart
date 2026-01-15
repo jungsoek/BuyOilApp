@@ -1,22 +1,17 @@
-class UserRequest {
-  final String phoneNumber;
-  final String rfidNumber;
-  final String countryDialCode;
-  final String machineID;
 
-  UserRequest({
-    required this.phoneNumber,
-    required this.rfidNumber,
-    required this.countryDialCode,
-    required this.machineID,
-  });
+class UserResult {
+  final String userId;
+  final bool driver;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'phoneNumber': phoneNumber,
-      'rfidNumber': rfidNumber,
-      'countryDialCode': countryDialCode,
-      'machineID': machineID,
-    };
+  UserResult({
+   required this.userId,
+   required this.driver,
+});
+
+  factory UserResult.fromJson(Map<String, dynamic> json) {
+    return UserResult(
+        userId: json['userId'] as String,
+        driver: json['driver'] as bool,
+    );
   }
 }

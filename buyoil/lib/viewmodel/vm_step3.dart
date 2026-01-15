@@ -13,11 +13,5 @@ class Step3 extends _$Step3 {
 
   void pressedClose() {
     ref.watch(serialPortVMProvider.notifier).close();
-    // // todo ok 처리
-    // state = UIStateStep3.closeDoor();
-    //
-    // Future.delayed(Duration(seconds: 2), () {
-    //   state = UIStateStep3.completed();
-    // });
   }
 }

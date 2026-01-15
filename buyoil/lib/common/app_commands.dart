@@ -76,9 +76,11 @@ class AppCommands {
   static const String cmdPhone = "[VALID]--ENDSTR";
   static const String cmdRFID = "[VALID]--ENDSTR";
   static const String validPhonePrefix = "[VALID]";
-  static const String validPhoneSuffix = "ENDSTR"; // 여기도 # 제거
+  static const String validPhoneSuffix = "ENDSTR";
   static const String validRFIDPrefix = "[VALID]";
-  static const String validRFIDSuffix = "ENDSTR"; // 여기도 # 제거
+  static const String validRFIDSuffix = "ENDSTR";
+  static const String prefixPer = "[PER]";
+
 
   static const String cmdOpens = "[CMD]OPENS";
   static const String cmdClose = "[CMD]CLOSES";

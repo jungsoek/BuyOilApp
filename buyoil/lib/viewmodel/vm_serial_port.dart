@@ -6,6 +6,8 @@ import 'package:buyoil/common/utils/show_toast.dart';
 import 'package:buyoil/common/utils/toast/toast_provider.dart';
 import 'package:buyoil/model/ui_state_usb_port.dart';
 import 'package:buyoil/router.dart';
+import 'package:buyoil/viewmodel/vm_sendPostPer.dart';
+import 'package:buyoil/viewmodel/vm_sendPostUCO.dart';
 import 'package:buyoil/viewmodel/vm_step1.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +30,9 @@ class SerialPortVM extends _$SerialPortVM {
   static const String _terminator = '#';
 
   // final RegExp formatRegex = RegExp(r'^(\[ANS\])?O(\d+(\.\d+)?)W(\d+(\.\d+)?)E$');
-  final RegExp formatRegex = RegExp(r'^(?:\[ANS\])?O\d+(\.\d+)?W\d+(\.\d+)?E#?$');
+  final RegExp formatRegex = RegExp(
+    r'^(?:\[ANS\])?O\d+(\.\d+)?W\d+(\.\d+)?E#?$',
+  );
   int _connectionAttemptIndex = 0;
   Timer? _inactivityTimer; // <--- 1. 비활성 상태 감지를 위한 타이머 추가
 
@@ -62,11 +66,14 @@ class SerialPortVM extends _$SerialPortVM {
   // <--- 2. 타이머를 시작하고 재설정하는 헬퍼 메서드 추가 ---
   void _resetInactivityTimer() {
     _inactivityTimer?.cancel(); // 기존 타이머가 있다면 취소
-    _inactivityTimer = Timer.periodic(const Duration(seconds: kDebugMode ? 120 : 120), (timer) {
-      // 120초 동안 아무런 쓰기 작업이 없으면 SLEEP 명령어 전송
-      showScafold(AppStrings.trySleep);
-      writeToPort(PORT_COMMANDS.sleep);
-    });
+    _inactivityTimer = Timer.periodic(
+      const Duration(seconds: kDebugMode ? 120 : 120),
+      (timer) {
+        // 120초 동안 아무런 쓰기 작업이 없으면 SLEEP 명령어 전송
+        showScafold(AppStrings.trySleep);
+        writeToPort(PORT_COMMANDS.sleep);
+      },
+    );
   }
 
   _init() async {
@@ -78,7 +85,7 @@ class SerialPortVM extends _$SerialPortVM {
     _subscription?.cancel(); // 이전 구독이 있다면 취소
     try {
       state.port?.close(); // 이전 포트가 있다면 닫기
-    } catch(e) {}
+    } catch (e) {}
     _receiveBuffer.clear();
 
     // 재연결 시도가 아닐 경우에만 init() 상태로 변경 (연결 끊김 메시지 유지를 위해)
@@ -119,7 +126,9 @@ class SerialPortVM extends _$SerialPortVM {
 
     if (devices.isEmpty) {
       showScafold(AppStrings.noConnectableDevicesFound);
-      state = UIStateUsbPort.error(errorMsg: AppStrings.noConnectableDevicesFound);
+      state = UIStateUsbPort.error(
+        errorMsg: AppStrings.noConnectableDevicesFound,
+      );
       return;
     }
 
@@ -127,8 +136,8 @@ class SerialPortVM extends _$SerialPortVM {
 
     try {
       deviceToConnect = devices.firstWhere(
-            (d) =>
-        (d.productName?.toLowerCase().contains("stm32") ?? false) ||
+        (d) =>
+            (d.productName?.toLowerCase().contains("stm32") ?? false) ||
             (d.productName?.toLowerCase().contains("usb serial") ?? false),
       );
       showScafold("Auto-selecting device: ${deviceToConnect.productName}");
@@ -156,8 +165,13 @@ class SerialPortVM extends _$SerialPortVM {
                     final device = devices[index];
                     return ListTile(
                       visualDensity: VisualDensity.compact,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
-                      title: Text("${index + 1}/${devices.length} ${device.productName ?? 'Unknown Device'}"),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 0,
+                      ),
+                      title: Text(
+                        "${index + 1}/${devices.length} ${device.productName ?? 'Unknown Device'}",
+                      ),
                       subtitle: Text('VID: ${device.vid}, PID: ${device.pid}'),
                       onTap: () {
                         Navigator.of(dialogContext).pop(device);
@@ -180,7 +194,9 @@ class SerialPortVM extends _$SerialPortVM {
 
         if (deviceToConnect == null) {
           showScafold(AppStrings.deviceSelectionCanceled);
-          state = UIStateUsbPort.error(errorMsg: AppStrings.deviceSelectionCanceled);
+          state = UIStateUsbPort.error(
+            errorMsg: AppStrings.deviceSelectionCanceled,
+          );
           return;
         }
       } else {
@@ -189,30 +205,41 @@ class SerialPortVM extends _$SerialPortVM {
       }
     }
 
-    showScafold("${AppStrings.tryToConnect}: ${deviceToConnect.productName ?? deviceToConnect.deviceName}");
+    showScafold(
+      "${AppStrings.tryToConnect}: ${deviceToConnect.productName ?? deviceToConnect.deviceName}",
+    );
+
     /// 디버그 기기 선택 시, 별도 동작 진행
-    if(Config.instance.isDebugMode && deviceToConnect.productName == "Select This Debug Device For Test") {
+    if (Config.instance.isDebugMode &&
+        deviceToConnect.productName == "Select This Debug Device For Test") {
       _connectionAttemptIndex = 0;
       UsbPort port = UsbPort("test port");
       // --- (포트 설정 및 listen 로직은 기존과 동일) ---
       await port.setDTR(true);
       await port.setRTS(true);
-      await port.setPortParameters(115200, UsbPort.DATABITS_8,
-          UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
+      await port.setPortParameters(
+        115200,
+        UsbPort.DATABITS_8,
+        UsbPort.STOPBITS_1,
+        UsbPort.PARITY_NONE,
+      );
 
-      _subscription = port.inputStream!.listen((Uint8List data) {
-        if (_reconnectAttempts > 0) {
-          showScafold("Device reconnected successfully!");
-          _reconnectAttempts = 0; // 성공했으므로 재시도 카운터 초기화
-          _reconnectTimer?.cancel();
-        }
+      _subscription = port.inputStream!.listen(
+        (Uint8List data) {
+          if (_reconnectAttempts > 0) {
+            showScafold("Device reconnected successfully!");
+            _reconnectAttempts = 0; // 성공했으므로 재시도 카운터 초기화
+            _reconnectTimer?.cancel();
+          }
 
-        final receivedString = String.fromCharCodes(data);
-        _receiveBuffer.write(receivedString);
-        showScafold("Received chunk: $receivedString (Buffer: ${_receiveBuffer.toString()})");
+          final receivedString = String.fromCharCodes(data);
+          _receiveBuffer.write(receivedString);
+          showScafold(
+            "Received chunk: $receivedString (Buffer: ${_receiveBuffer.toString()})",
+          );
 
-        // 3. 버퍼에 종료 문자가 있는지 확인하고, 있으면 처리
-        _processBuffer();
+          // 3. 버퍼에 종료 문자가 있는지 확인하고, 있으면 처리
+          _processBuffer();
         },
         onError: (error) {
           print("Port stream error: $error. Attempting to reconnect...");
@@ -220,16 +247,24 @@ class SerialPortVM extends _$SerialPortVM {
           state = UIStateUsbPort.error(errorMsg: "Connection error: $error");
           _handleDisconnection();
         },
-          onDone: () {
-            print("Port connection lost (onDone). Attempting to reconnect...");
-            showScafold("Connection lost. Trying to reconnect...");
-            state = UIStateUsbPort.error(errorMsg: "Connection lost. Retrying...");
-            _handleDisconnection();
-      });
+        onDone: () {
+          print("Port connection lost (onDone). Attempting to reconnect...");
+          showScafold("Connection lost. Trying to reconnect...");
+          state = UIStateUsbPort.error(
+            errorMsg: "Connection lost. Retrying...",
+          );
+          _handleDisconnection();
+        },
+      );
 
-      state = UIStateUsbPort.connected(port: port, connectedDevice: deviceToConnect);
-      final connectedDeviceName = deviceToConnect.productName ?? deviceToConnect.deviceName;
-      final toastMessage = "Connection Succeeded: $connectedDeviceName (VID:${deviceToConnect.vid}, PID:${deviceToConnect.pid})";
+      state = UIStateUsbPort.connected(
+        port: port,
+        connectedDevice: deviceToConnect,
+      );
+      final connectedDeviceName =
+          deviceToConnect.productName ?? deviceToConnect.deviceName;
+      final toastMessage =
+          "Connection Succeeded: $connectedDeviceName (VID:${deviceToConnect.vid}, PID:${deviceToConnect.pid})";
 
       showScafold(toastMessage);
       _resetInactivityTimer();
@@ -261,36 +296,50 @@ class SerialPortVM extends _$SerialPortVM {
     // --- (포트 설정 및 listen 로직은 기존과 동일) ---
     await port.setDTR(true);
     await port.setRTS(true);
-    await port.setPortParameters(115200, UsbPort.DATABITS_8,
-        UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
+    await port.setPortParameters(
+      115200,
+      UsbPort.DATABITS_8,
+      UsbPort.STOPBITS_1,
+      UsbPort.PARITY_NONE,
+    );
 
-    _subscription = port.inputStream!.listen((Uint8List data) {
-      // 데이터 수신 시 재연결 상태였다면 완전한 성공으로 간주
-      if (_reconnectAttempts > 0 || _reconnectTimer?.isActive == true) {
-        showScafold("Device reconnected successfully!");
-        print("Device reconnected successfully!");
-        _reconnectAttempts = 0;
-        _reconnectTimer?.cancel();
-      }
+    _subscription = port.inputStream!.listen(
+      (Uint8List data) {
+        // 데이터 수신 시 재연결 상태였다면 완전한 성공으로 간주
+        if (_reconnectAttempts > 0 || _reconnectTimer?.isActive == true) {
+          showScafold("Device reconnected successfully!");
+          print("Device reconnected successfully!");
+          _reconnectAttempts = 0;
+          _reconnectTimer?.cancel();
+        }
 
-      final receivedString = String.fromCharCodes(data);
-      _receiveBuffer.write(receivedString);
-      showScafold("Received chunk: $receivedString (Buffer: ${_receiveBuffer.toString()})");
-      // 3. 버퍼에 종료 문자가 있는지 확인하고, 있으면 처리
-      _processBuffer();
-    }, onDone: () {
-      print("Port connection lost (onDone).");
-      state = UIStateUsbPort.error(errorMsg: "Connection lost. Retrying...");
-      _handleDisconnection();
-    },
-    onError: (error) {
-      print("Port stream error: $error.");
-      state = UIStateUsbPort.error(errorMsg: "Connection error: $error");
-      _handleDisconnection();
-    });
-    state = UIStateUsbPort.connected(port: port, connectedDevice: deviceToConnect);
-    final connectedDeviceName = deviceToConnect.productName ?? deviceToConnect.deviceName;
-    final toastMessage = "Connection Succeeded: $connectedDeviceName (VID:${deviceToConnect.vid}, PID:${deviceToConnect.pid})";
+        final receivedString = String.fromCharCodes(data);
+        _receiveBuffer.write(receivedString);
+        showScafold(
+          "Received chunk: $receivedString (Buffer: ${_receiveBuffer.toString()})",
+        );
+        // 3. 버퍼에 종료 문자가 있는지 확인하고, 있으면 처리
+        _processBuffer();
+      },
+      onDone: () {
+        print("Port connection lost (onDone).");
+        state = UIStateUsbPort.error(errorMsg: "Connection lost. Retrying...");
+        _handleDisconnection();
+      },
+      onError: (error) {
+        print("Port stream error: $error.");
+        state = UIStateUsbPort.error(errorMsg: "Connection error: $error");
+        _handleDisconnection();
+      },
+    );
+    state = UIStateUsbPort.connected(
+      port: port,
+      connectedDevice: deviceToConnect,
+    );
+    final connectedDeviceName =
+        deviceToConnect.productName ?? deviceToConnect.deviceName;
+    final toastMessage =
+        "Connection Succeeded: $connectedDeviceName (VID:${deviceToConnect.vid}, PID:${deviceToConnect.pid})";
 
     showScafold(toastMessage);
     _resetInactivityTimer(); // <--- 4. 연결 성공 시 타이머 시작
@@ -320,14 +369,17 @@ class SerialPortVM extends _$SerialPortVM {
       print("Max reconnect attempts reached. Stopping reconnection.");
       showScafold("Failed to reconnect. Please check the connection.");
       state = UIStateUsbPort.error(
-        errorMsg: "Failed to reconnect. Please check the cable and restart the app.",
+        errorMsg:
+            "Failed to reconnect. Please check the cable and restart the app.",
       );
       _reconnectAttempts = 0; // 다음 수동 연결을 위해 초기화
       return;
     }
 
     _reconnectAttempts++;
-    print("Attempting to reconnect... ($_reconnectAttempts/$_maxReconnectAttempts)");
+    print(
+      "Attempting to reconnect... ($_reconnectAttempts/$_maxReconnectAttempts)",
+    );
     showScafold("Reconnection attempt $_reconnectAttempts...");
 
     // 3초 후에 `connectPort` 함수를 다시 호출하여 연결 시도
@@ -338,14 +390,15 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   /// 포트에 쓰기
-  Future<void> writeToPort(PORT_COMMANDS command, {BuildContext? context}) async {
-    print("writeToPort");
-    // SLEEP 명령 자체는 타이머를 재설정하지 않도록 예외 처리
+  Future<void> writeToPort(
+    PORT_COMMANDS command, {
+    BuildContext? context,
+  }) async {
     if (command != PORT_COMMANDS.sleep) {
-      _resetInactivityTimer(); // <--- 5. 쓰기 작업 시 타이머 재설정
+      _resetInactivityTimer();
     }
 
-    if(Config.instance.isDebugMode) {
+    if (Config.instance.isDebugMode) {
       state = state.copyWith(lastCommand: command);
       String packet = "${command.command}#";
       final dataToSend = Uint8List.fromList(packet.codeUnits);
@@ -353,344 +406,261 @@ class SerialPortVM extends _$SerialPortVM {
       return;
     }
 
-    if(state is UIStateUsbPortConnected) {
+    if (state is UIStateUsbPortConnected) {
       state = state.copyWith(lastCommand: command);
       String packet = "${command.command}#";
       final dataToSend = Uint8List.fromList(packet.codeUnits);
       write(dataToSend);
     } else {
-      if(context != null && context.mounted) {
+      if (context != null && context.mounted) {
         showToastMessage(context, "Port not connected");
       }
     }
   }
 
-  Future<void> writeToPortPhone(String phoneCommand, {BuildContext? context}) async {
-    _resetInactivityTimer(); // <--- 6. 쓰기 작업 시 타이머 재설정
+  Future<void> writeToPortPhone(
+      String phoneCommand, {
+        BuildContext? context,
+      }) async {
+    _resetInactivityTimer();
 
-    if(Config.instance.isDebugMode) {
-      state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
-      print("[DEBUG] writeToPort: ${phoneCommand}");
-      String packet = "$phoneCommand#";
-      final dataToSend = Uint8List.fromList(packet.codeUnits);
-
-      final fetchResult = await fetchData(phoneCommand);
-
-      if(fetchResult != null) {
-        print('[userId] : ${fetchResult.userId}');
-        print('[driver] : ${fetchResult.driver}');
-        ref.read(step1Provider.notifier).rfidAuthenticated(phoneCommand);
-      } else {
-        print('Fetch fail_vm_serial_port.dart_418');
-      }
-
-      write(dataToSend);
+    // 전화번호 정리
+    String cleanNumber = phoneCommand;
+    if (cleanNumber.startsWith('[VALID]')) {
+      cleanNumber = cleanNumber.replaceFirst('[VALID]', '');
+    }
+    if (cleanNumber.endsWith('ENDSTR')) {
+      cleanNumber = cleanNumber.replaceFirst('ENDSTR', '');
     }
 
-    print("[DEBUG] writeToPort: phone: $phoneCommand");
-    if(state is UIStateUsbPortConnected) {
-      state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
-      String packet = "$phoneCommand#";
-      final dataToSend = Uint8List.fromList(packet.codeUnits);
+    print('[PHONE] raw=$phoneCommand / clean=$cleanNumber');
 
-      final fetchResult = await fetchData(phoneCommand);
+    // 서버 인증 (STM32와 무관)
+    final fetchResult = await fetchUser(cleanNumber);
 
-      if(fetchResult != null) {
-        print('[userId] : ${fetchResult.userId}');
-        print('[driver] : ${fetchResult.driver}');
-        ref.read(step1Provider.notifier).rfidAuthenticated(phoneCommand);
-      } else {
-        print('Fetch fail_vm_serial_port.dart_392');
+    if (fetchResult == null) {
+      print('[PHONE] Fetch fail');
+      if (context != null && context.mounted) {
+        showToastMessage(context, "인증 실패");
+      }
+      return; // STM32 아무것도 안 보냄
+    }
+
+    print('[PHONE] userId=${fetchResult.userId}');
+    print('[PHONE] driver=${fetchResult.driver}');
+
+    // 서버 결과 기반 분기
+    if (fetchResult != null) {
+      // 드라이버 권한
+      if (state is UIStateUsbPortConnected) {
+        state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
+
+        final packet = "${PORT_COMMANDS.openB.command}#";
+        write(Uint8List.fromList(packet.codeUnits));
       }
 
-      write(dataToSend);
+      // 드라이버 화면 이동
+      ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
     } else {
-      if(context != null && context.mounted) {
-        showToastMessage(context, "Port not connected");
+      // 일반 사용자 or 비인가
+      if (state is UIStateUsbPortConnected) {
+        state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
+
+        final packet = "${PORT_COMMANDS.open.command}#";
+        write(Uint8List.fromList(packet.codeUnits));
       }
+
+      // 일반 사용자 흐름 (다음 스텝 이동)
+      ref.read(routerProvider).goNamed(RouteGroup.Step2.name);
     }
   }
 
-  Future<void> writeToPortRFID(String rfidCommand, {BuildContext? context}) async {
-    _resetInactivityTimer(); // <--- 6. 쓰기 작업 시 타이머 재설정
 
-    print("UID : ${rfidCommand}");
+  Future<void> writeToPortRFID(
+      String rfidCommand, {
+        BuildContext? context,
+      }) async {
+    _resetInactivityTimer();
 
-    if(Config.instance.isDebugMode) {
-      state = state.copyWith(lastCommand: PORT_COMMANDS.cmdRFID);
-      print("[DEBUG] writeToPort: ${rfidCommand}");
-      String packet = "$rfidCommand#";
-      final dataToSend = Uint8List.fromList(packet.codeUnits);
-
-      final fetchResult = await fetchData(rfidCommand);
-
-      if(fetchResult != null) {
-        print('[userId] : ${fetchResult.userId}');
-        print('[driver] : ${fetchResult.driver}');
-        ref.read(step1Provider.notifier).rfidAuthenticated(rfidCommand);
-      } else {
-        print('Fetch fail_vm_serial_port.dart_418');
-      }
-
-      write(dataToSend);
+    // RFID 정리
+    String cleanNumber = rfidCommand;
+    if (cleanNumber.startsWith('[VALID]')) {
+      cleanNumber = cleanNumber.replaceFirst('[VALID]', '');
+    }
+    if (cleanNumber.endsWith('ENDSTR')) {
+      cleanNumber = cleanNumber.replaceFirst('ENDSTR', '');
     }
 
-    print("[DEBUG] writeToPort: rfid: $rfidCommand");
-    if(state is UIStateUsbPortConnected) {
-      state = state.copyWith(lastCommand: PORT_COMMANDS.cmdRFID);
-      String packet = "$rfidCommand#";
-      final dataToSend = Uint8List.fromList(packet.codeUnits);
+    print('[RFID] raw=$rfidCommand / clean=$cleanNumber');
 
-      final fetchResult = await fetchData(rfidCommand);
+    // 서버 인증 (STM32랑 무관)
+    final fetchResult = await fetchUser(cleanNumber);
 
-      if(fetchResult != null) {
-        print('[userId] : ${fetchResult.userId}');
-        print('[driver] : ${fetchResult.driver}');
-        ref.read(step1Provider.notifier).rfidAuthenticated(rfidCommand);
-      } else {
-        print('Fetch fail_vm_serial_port.dart_418');
+    if (fetchResult == null) {
+      print('[RFID] Fetch fail');
+      if (context != null && context.mounted) {
+        showToastMessage(context, "인증 실패");
+      }
+      return; // 여기서 종료 (STM32 아무것도 안 보냄)
+    }
+
+    print('[RFID] userId=${fetchResult.userId}');
+    print('[RFID] driver=${fetchResult.driver}');
+
+    // 서버 결과 기반 분기
+    if (fetchResult != null) {
+      // 승인 → STM32에 "행동"만 보냄
+      if (state is UIStateUsbPortConnected) {
+        state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
+
+        final packet = "${PORT_COMMANDS.openB.command}#";
+        write(Uint8List.fromList(packet.codeUnits));
       }
 
-      write(dataToSend);
+      // 화면 이동
+      ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
     } else {
-      if(context != null && context.mounted) {
-        showToastMessage(context, "Port not connected");
+      // 비인가
+      if (context != null && context.mounted) {
+        showToastMessage(context, "권한이 없습니다");
+      }
+
+      // 필요 시 STM32 슬립
+      if (state is UIStateUsbPortConnected) {
+        final packet = "${PORT_COMMANDS.sleep.command}#";
+        write(Uint8List.fromList(packet.codeUnits));
       }
     }
   }
+
+  Future<void> writeToPortPostUCO(
+      String ucoJson, {
+        BuildContext? context,
+      }) async {
+    _resetInactivityTimer();
+
+    print('[POST_UCO][RAW] $ucoJson');
+
+    if (!ucoJson.startsWith('{') || !ucoJson.endsWith('}')) {
+      print('[POST_UCO] Invalid JSON format');
+      return;
+    }
+
+    final fetchResult = await fetchPostUCO(ucoJson);
+
+    if (fetchResult == true) {
+      print('[POST_UCO] Fetch Success');
+    } else {
+      print('[POST_UCO] Fetch Fail');
+
+      if (context != null && context.mounted) {
+        showToastMessage(context, "UCO 데이터 전송 실패");
+      }
+    }
+  }
+
+  Future<void> writeToPortPostPer(
+      String measuredData, {
+        BuildContext? context,
+      }) async {
+    _resetInactivityTimer();
+
+    print("[POST_PER][RAW] $measuredData");
+
+    // JSON 유효성 최소 검증
+    if (!measuredData.startsWith('{') || !measuredData.endsWith('}')) {
+      print('[POST_PER] Invalid JSON format');
+      return;
+    }
+
+    // 서버 전송 (STM32와 무관)
+    final fetchResult = await fetchPostPer(measuredData);
+
+    if (fetchResult == true) {
+      print('[POST_PER] Fetch Success');
+
+      // 서버 성공 → UI 상태만 갱신
+      state = state.copyWith(
+        lastCommand: PORT_COMMANDS.postper,
+      );
+
+      // 필요 시 화면 이동
+      // ref.read(routerProvider).goNamed(RouteGroup.Result.name);
+    } else {
+      print('[POST_PER] Fetch Fail');
+
+      if (context != null && context.mounted) {
+        showToastMessage(context, "서버 전송 실패");
+      }
+    }
+  }
+
 
   // 포트에서 받은 값 처리
-  // 직전 명령에 따라서 동작 별도 처리
   void listenByPort(String receivedString) {
-    if(!receivedString.startsWith(AppCommands.prefixAnswer)) {
-      showScafold("Prefix String is not [ANS]");
-      return ;
-    }
-    showScafold("[${state.lastCommand}]listenByPort: $receivedString#\n_receiveBuffer:${_receiveBuffer}");
-    print("[DEBUG] lastCommand  : ${state.lastCommand}");
-    print("[DEBUG] listenByPort : $receivedString");
-    // 최초 화면에서
-    if(state.lastCommand == PORT_COMMANDS.handshake) {
-      // OK 받으면
-      if(receivedString == PORT_RESPONSES.ok.response) {
-        // 전화번호 입력 페이지 이동
-        ref.watch(routerProvider).goNamed(RouteGroup.Step1.name);
-      } else if(receivedString == PORT_RESPONSES.fail.response) {
-        // 아니면 기본 화면 유지
-        ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-      } else if(receivedString == PORT_RESPONSES.full.response) {
-        ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-        // 1. 5초간 팝업 띄우기
-        ref.read(toastProvider.notifier).showToast(AppStrings.fullContainer, duration: Duration(seconds: 5));
-      }
-    }
+    print("[UART][RX] $receivedString");
 
-    if (receivedString == PORT_RESPONSES.fail.response) {
-      state = state.copyWith(lastCommand: null);
-      // 2. 첫 페이지(Splash)로 이동
-      ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-      // 1. 5초간 팝업 띄우기
-      ref.read(toastProvider.notifier).showToast(AppStrings.systemError, duration: Duration(seconds: 5));
+    // PER 데이터
+    if (receivedString.startsWith("[PER]")) {
+      final json = receivedString
+          .replaceFirst("[PER]", "")
+          .trim();
+
+      writeToPortPostPer(json);
       return;
     }
 
-    // [ANS]STM_SLEEP# 응답을 받으면
-    if (receivedString == PORT_RESPONSES.stmSleep.response) {
-      showScafold("Received STM_SLEEP. Going to Splash.");
-      // 스플래시 화면으로 이동
-      ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-      // lastCommand를 초기화하여 추가 동작 방지
-      state = state.copyWith(lastCommand: null);
-      return; // 이 응답 처리는 여기서 종료
+    // UCO 데이터
+    if (receivedString.startsWith("[UCO]")) {
+      final json = receivedString
+          .replaceFirst("[UCO]", "")
+          .trim();
+
+      writeToPortPostUCO(json);
+      return;
     }
 
-    // 전화번호 send 응답이
-    if(state.lastCommand == PORT_COMMANDS.cmdPhone) {
-      // OK 받으면
-      if(receivedString == PORT_RESPONSES.ok.response) {
-        // 성공 시 실패 카운터 초기화
-        state = state.copyWith(resetFailCount: 0);
-
-        // page4(Step2) 오픈 화면 이동
-        ref.watch(routerProvider).goNamed(RouteGroup.Step2.name);
-      } else if(receivedString == PORT_RESPONSES.open.response) {
-        // 성공 시 실패 카운터 초기화
-        state = state.copyWith(resetFailCount: 0);
-        // Opening Door Screen 이동
-        ref.watch(routerProvider).goNamed(RouteGroup.OpeningDoor.name);
-      } else if(receivedString == PORT_RESPONSES.fail.response) {
-        // todo 변경사항 확인하기
-        ref.read(step1Provider.notifier).showErrorToast();
-      } else if(receivedString == PORT_RESPONSES.reject.response) {
-        final newFailCount = (state.resetFailCount ?? 0) + 1;
-        state = state.copyWith(resetFailCount: newFailCount);
-        if (newFailCount >= 5) {
-          // 1. 5회 실패: 첫 페이지로 복귀
-          ref.read(toastProvider.notifier).showToast(
-              AppStrings.accessDenied,
-              duration: Duration(seconds: 5));
-          ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-          // 상태 초기화
-          state = state.copyWith(lastCommand: null, resetFailCount: 0);
-        } else {
-          // 2. 5회 미만 실패: 팝업 메시지 표시 (페이지는 그대로 유지)
-          ref.read(toastProvider.notifier).showToast(
-              AppStrings.accessDenied,
-              duration: Duration(seconds: 3)
-          );
-        }
-        // todo 변경사항 확인하기
-      } else if(receivedString == PORT_RESPONSES.notAuth.response) {
-        // *return “NOTAUTH” -> Please shows the proper driver code
-        // TODO
-      } else if(receivedString == PORT_RESPONSES.driverTrue.response) {
-        // send "[CMD]OPENB#" and shows driver's page.
-        writeToPort(PORT_COMMANDS.openB).whenComplete(() {
-          goToDriverPage();
-        });
-      } else if(receivedString == PORT_RESPONSES.driverFalse.response) {
-        ref.read(toastProvider.notifier).showToast(AppStrings.notAuthorized);
-        // send "[CMD]SLEEP#" and shows not authorized.
-        writeToPort(PORT_COMMANDS.sleep);
-      }
+    /* ================================
+   * ANS 응답 처리
+   * ================================ */
+    if (!receivedString.startsWith(AppCommands.prefixAnswer)) {
+      print('[WARN] Unknown packet: $receivedString');
+      return;
     }
 
-    // RFID send 응답이
-    if(state.lastCommand == PORT_COMMANDS.cmdRFID) {
-      // OK 받으면
-      if(receivedString == PORT_RESPONSES.ok.response) {
-        // 성공 시 실패 카운터 초기화
-        state = state.copyWith(resetFailCount: 0);
+    print("[UART][ANS] lastCommand=${state.lastCommand}, data=$receivedString");
 
-        // page4(Step2) 오픈 화면 이동
-        ref.watch(routerProvider).goNamed(RouteGroup.Step2.name);
-      } else if(receivedString == PORT_RESPONSES.open.response) {
-        // 성공 시 실패 카운터 초기화
-        state = state.copyWith(resetFailCount: 0);
-        // Opening Door Screen 이동
-        ref.watch(routerProvider).goNamed(RouteGroup.OpeningDoor.name);
-      } else if(receivedString == PORT_RESPONSES.fail.response) {
-        // todo 변경사항 확인하기
-        ref.read(step1Provider.notifier).showErrorToast();
-      } else if(receivedString == PORT_RESPONSES.reject.response) {
-        final newFailCount = (state.resetFailCount ?? 0) + 1;
-        state = state.copyWith(resetFailCount: newFailCount);
-        if (newFailCount >= 5) {
-          // 1. 5회 실패: 첫 페이지로 복귀
-          ref.read(toastProvider.notifier).showToast(
-              AppStrings.accessDenied,
-              duration: Duration(seconds: 5));
+    /* ================================
+   * 기존 상태 머신
+   * ================================ */
 
-          ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-          // 상태 초기화
-          state = state.copyWith(lastCommand: null, resetFailCount: 0);
-        } else {
-          // 2. 5회 미만 실패: 팝업 메시지 표시 (페이지는 그대로 유지)
-          ref.read(toastProvider.notifier).showToast(
-              AppStrings.accessDenied,
-              duration: Duration(seconds: 3)
-          );
-        }
-        // todo 변경사항 확인하기
-      } else if(receivedString == PORT_RESPONSES.notAuth.response) {
-        // *return “NOTAUTH” -> Please shows the proper driver code
-        // TODO
-      } else if(receivedString == PORT_RESPONSES.driverTrue.response) {
-        // send "[CMD]OPENB#" and shows driver's page.
-        writeToPort(PORT_COMMANDS.openB).whenComplete(() {
-          goToDriverPage();
-        });
-      } else if(receivedString == PORT_RESPONSES.driverFalse.response) {
-        ref.read(toastProvider.notifier).showToast(AppStrings.notAuthorized);
-        // send "[CMD]SLEEP#" and shows not authorized.
-        writeToPort(PORT_COMMANDS.sleep);
-      }
-    }
-
-    // Open 명령어
-    if(state.lastCommand == PORT_COMMANDS.open) {
-      // ok 응답 -> Close 화면 이동
-      if(receivedString == PORT_RESPONSES.ok.response) {
-        ref.watch(routerProvider).goNamed(RouteGroup.Step3.name);
-      }
-    }
-
-    // 'postper'
-    if (state.lastCommand == PORT_COMMANDS.postper) {
+    // handshake
+    if (state.lastCommand == PORT_COMMANDS.handshake) {
       if (receivedString == PORT_RESPONSES.ok.response) {
-        // 1. postper에 대한 응답을 받으면 lastCommand를 초기화하여 재시도 타이머를 멈춤
-        state = state.copyWith(lastCommand: null);
-        // 1-1. 응답이 'OK'이면, 바로 'postData'를 전송
-        print("Received OK for 'postper', now sending 'postData'.");
-        showScafold("Received OK for 'postper', now sending 'postData'.");
-        // poster -> postData 로 이어지므로 마지막 명령어 자체 업데이트
-        state = state.copyWith(lastCommand: PORT_COMMANDS.postData);
-        okayNextStep(); // postData를 보내는 전용 함수 호출
-        return;
-      }
-    }
-
-    if(state.lastCommand == PORT_COMMANDS.postData) {
-      if (receivedString == PORT_RESPONSES.ok.response) {
-        // 2. postData에 대한 응답을 받으면 lastCommand를 초기화하여 재시도 타이머를 멈춤
-        state = state.copyWith(lastCommand: null);
-        // 2-1. 응답이 'OK'이면 모든 과정이 성공했으므로 스플래시 화면으로 이동
-        print("Received OK for 'postData'. Process complete.");
-        showScafold("Received OK for 'postData'. Process complete.");
+        ref.watch(routerProvider).goNamed(RouteGroup.Step1.name);
+      } else if (receivedString == PORT_RESPONSES.fail.response) {
         ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-      }
-    }
-
-    // Close 명령어
-    if(state.lastCommand == PORT_COMMANDS.close) {
-      // O, W, E 포맷이면
-      if(formatRegex.hasMatch(receivedString)) {
-        state = state.copyWith(lastCommand: null);
-        (double oil, double water) res = AppCommands.returnOilWaterFormat(receivedString);
-
-        // 초기화 후 Step4화면 재실행
-        if(state.connectedDevice != null && state.port != null) {
-          state = UIStateUsbPortConnected(
-            availablePorts: state.availablePorts,
-            connectedDevice: state.connectedDevice!,
-            port: state.port!,
-            lastCommand: null,
-          );
-        }
-
-        ref.read(routerProvider).goNamed(RouteGroup.Step4.name, queryParameters: {
-          "oil": "${res.$1}",
-          "water": "${res.$2}",
-        });
-      }
-    }
-
-    if(state.lastCommand == PORT_COMMANDS.recheck) {
-      // O, W, E 포맷이면
-      if(formatRegex.hasMatch(receivedString)) {
-        // 초기화 후 Step4화면 재실행
-        state = UIStateUsbPortConnected(
-          availablePorts: state.availablePorts,
-          connectedDevice: state.connectedDevice,
-          port: state.port,
-          lastCommand: null,
+      } else if (receivedString == PORT_RESPONSES.full.response) {
+        ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
+        ref.read(toastProvider.notifier).showToast(
+          AppStrings.fullContainer,
+          duration: Duration(seconds: 5),
         );
-
-        (double oil, double water) res = AppCommands.returnOilWaterFormat(receivedString);
-        // 초기화 후 Step4화면 재실행
-        print("recheck success: ${state.connectedDevice}/ ${state.port}");
-        ref.read(routerProvider).goNamed(RouteGroup.Step4.name, queryParameters: {
-          "oil": "${res.$1}",
-          "water": "${res.$2}",
-        });
       }
+      state = state.copyWith(lastCommand: null);
+      return;
     }
 
-    // ok 명령 받은 경우 lastCommand 초기화
-    if(receivedString == PORT_RESPONSES.ok.response) {
-      if(state.lastCommand == PORT_COMMANDS.postData || state.lastCommand == PORT_COMMANDS.postper || state.lastCommand == PORT_COMMANDS.recheck) {
-        return;
-      }
+    // OPEN
+    if (state.lastCommand == PORT_COMMANDS.open &&
+        receivedString == PORT_RESPONSES.ok.response) {
+      ref.watch(routerProvider).goNamed(RouteGroup.Step3.name);
+      state = state.copyWith(lastCommand: null);
+      return;
+    }
+
+    // 공통 OK 처리
+    if (receivedString == PORT_RESPONSES.ok.response) {
       state = state.copyWith(lastCommand: null);
     }
   }
@@ -709,7 +679,7 @@ class SerialPortVM extends _$SerialPortVM {
   Future<void> open() async {
     // 30초 이내에 ok 안오면 재시도
     Future.delayed(Duration(seconds: Config.instance.isDebugMode ? 5 : 30), () {
-      if(state.lastCommand == PORT_COMMANDS.open) {
+      if (state.lastCommand == PORT_COMMANDS.open) {
         open();
       }
     });
@@ -720,7 +690,7 @@ class SerialPortVM extends _$SerialPortVM {
   Future<void> close() async {
     // 30초 이내에 ok 안오면 재시도
     Future.delayed(Duration(seconds: Config.instance.isDebugMode ? 5 : 30), () {
-      if(state.lastCommand == PORT_COMMANDS.close) {
+      if (state.lastCommand == PORT_COMMANDS.close) {
         close();
       }
     });
@@ -729,6 +699,7 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   Future<void> start() async {
+    okay();
     return await writeToPort(PORT_COMMANDS.handshake);
   }
 
@@ -739,6 +710,14 @@ class SerialPortVM extends _$SerialPortVM {
       if (state.lastCommand == PORT_COMMANDS.postper) {
         showScafold("No response for 'postper', retrying...");
         print("No response for 'postper', retrying...");
+
+        okay(); // 'postper' 전송 재시도
+      }
+
+      if (state.lastCommand == PORT_COMMANDS.postData) {
+        showScafold("No response for 'postper', retrying...");
+        print("No response for 'postper', retrying...");
+
         okay(); // 'postper' 전송 재시도
       }
     });
@@ -778,11 +757,12 @@ class SerialPortVM extends _$SerialPortVM {
       lastCommand: PORT_COMMANDS.recheck,
     );
     return await writeToPort(PORT_COMMANDS.recheck);
-
   }
 
   Future<void> sendPhoneNumber(String phoneNumber) async {
-    return await writeToPortPhone(PORT_COMMANDS.getValidPhoneCommand(phoneNumber));
+    return await writeToPortPhone(
+      PORT_COMMANDS.getValidPhoneCommand(phoneNumber),
+    );
   }
 
   Future<void> sendRFIDNumber(String uid) async {
@@ -793,7 +773,9 @@ class SerialPortVM extends _$SerialPortVM {
   void listenDebug(String data) {
     // 1. 디버그용 데이터를 실제 수신 버퍼에 추가합니다.
     _receiveBuffer.write(data);
-    showScafold("Debug data injected: $data (Buffer: ${_receiveBuffer.toString()})");
+    showScafold(
+      "Debug data injected: $data (Buffer: ${_receiveBuffer.toString()})",
+    );
 
     // 2. 실제 데이터가 들어왔을 때와 동일한 버퍼 처리 로직을 호출합니다.
     _processBuffer();
@@ -821,14 +803,14 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   void showScafold(String data) {
-    if(Config.instance.isDebugMode) {
+    if (Config.instance.isDebugMode) {
       Fluttertoast.showToast(
-          msg: data,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0
+        msg: data,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
     }
   }
@@ -863,22 +845,21 @@ class SerialPortVM extends _$SerialPortVM {
 
   //Loading 등이면 초기화 처리 진행
   void initPortState() {
-    if(state.connectedDevice == null) {
+    if (state.connectedDevice == null) {
       state = UIStateUsbPort.init(
-          availablePorts: state.availablePorts,
-          connectedDevice: state.connectedDevice,
-          port: state.port,
-          lastCommand: null,
+        availablePorts: state.availablePorts,
+        connectedDevice: state.connectedDevice,
+        port: state.port,
+        lastCommand: null,
       );
       return;
     }
 
     state = UIStateUsbPort.connected(
-        availablePorts: state.availablePorts,
-        connectedDevice: state.connectedDevice!,
-        port: state.port!,
-        lastCommand: null,
+      availablePorts: state.availablePorts,
+      connectedDevice: state.connectedDevice!,
+      port: state.port!,
+      lastCommand: null,
     );
   }
-
 }

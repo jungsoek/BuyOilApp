@@ -39,54 +39,6 @@ class _ConnectPortButtonState extends ConsumerState<ConnectPortButton> {
     }
   }
 
-  // Future<void> _showSecretDialog() async {
-  //   final TextEditingController controller = TextEditingController();
-  //   final result = await showDialog<String>(
-  //     context: context,
-  //     barrierDismissible: false, // 다이얼로그 바깥을 탭해도 닫히지 않도록
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Input Password'),
-  //         content: TextField(
-  //           controller: controller,
-  //           keyboardType: TextInputType.number,
-  //           obscureText: true, // 비밀번호처럼 보이도록 (선택 사항)
-  //           decoration: const InputDecoration(hintText: '4 Digits'),
-  //           maxLength: 4,
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Cancel'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // 다이얼로그 닫기
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: const Text('Ok'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop(controller.text); // 입력된 값 반환하며 닫기
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  //
-    // if (result == _secretCode) {
-    //   print("Secret code matched. Navigating to SecretPage.");
-    //   if (mounted) { // 위젯이 여전히 마운트되어 있는지 확인
-    //
-    //   }
-    // } else if (result != null) {
-    //   print("Secret code does not match. Entered: $result");
-    //   if (mounted) {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
-    //     );
-    //   }
-    // }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

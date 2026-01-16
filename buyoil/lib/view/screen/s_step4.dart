@@ -131,16 +131,26 @@ class Step4ScreenState extends ConsumerState<Step4Screen> {
   _checkButton() {
     return ElevatedButton(
       onPressed: () {
-        ref.read(serialPortVMProvider.notifier).okay();
+        ref.read(serialPortVMProvider.notifier).okay(
+          oil: widget.oil,
+          water: widget.water,
+        );
       },
       style: ElevatedButton.styleFrom(
-        elevation: 2, // 약간의 그림자
-        backgroundColor: AppColors.PRIMARY
+        elevation: 2,
+        backgroundColor: AppColors.PRIMARY,
       ),
       child: Container(
-          width: 331, height: 91, alignment: Alignment.center,
-          child: Image.asset("${AppStrings.assetPath}img_check.png", width: 60, height: 60, color: Colors.white,)
-      )
+        width: 331,
+        height: 91,
+        alignment: Alignment.center,
+        child: Image.asset(
+          "${AppStrings.assetPath}img_check.png",
+          width: 60,
+          height: 60,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 

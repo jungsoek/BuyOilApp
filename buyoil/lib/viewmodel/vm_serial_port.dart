@@ -47,7 +47,7 @@ class SerialPortVM extends _$SerialPortVM {
     _reconnectAttempts = 0;
 
     // Riverpod 2.0에서는 @dispose 어노테이션을 사용하거나,
-    // ref.onDispose를 사용하여 리소스를 정리합니다.
+    // ref.onDispose를 사용하여 리소스를 정리
     ref.onDispose(() {
       _subscription?.cancel();
       try {
@@ -817,29 +817,27 @@ class SerialPortVM extends _$SerialPortVM {
     return await writeToPort(PORT_COMMANDS.handshake);
   }
 
-  Future<void> okay() async {
-    // 1. 'postper' 명령에 대한 재시도 로직 설정
+  Future<void> okay({double? oil, double? water}) async {
+    // 1. 서버 전송 (UCO 데이터 업로드)
+    // 측정값이 전달되었다면 JSON으로 변환하여 서버에 먼저 전송
+    if (oil != null && water != null) {
+      final String ucoJson = '{"oil": $oil, "water": $water}';
+      // 비동기로 실행하되, 서버 응답을 기다리지 않고 장치 명령을 진행할 수도 있다.
+      writeToPortPostUCO(ucoJson);
+    }
+
+    // 2. 'postper' 명령에 대한 재시도 로직 설정
     Future.delayed(Duration(seconds: Config.instance.isDebugMode ? 5 : 10), () {
-      // 30초 후에도 lastCommand가 여전히 postper이면, 응답이 없는 것이므로 재시도
-      if (state.lastCommand == PORT_COMMANDS.postper) {
-        showScafold("No response for 'postper', retrying...");
-        print("No response for 'postper', retrying...");
-
-        okay(); // 'postper' 전송 재시도
-      }
-
-      if (state.lastCommand == PORT_COMMANDS.postData) {
-        showScafold("No response for 'postper', retrying...");
-        print("No response for 'postper', retrying...");
-
-        okay(); // 'postper' 전송 재시도
+      if (state.lastCommand == PORT_COMMANDS.postper || state.lastCommand == PORT_COMMANDS.postData) {
+        showScafold("No response, retrying okay process...");
+        okay(); // 재시도 시에는 파라미터 없이 호출하여 장치 명령만 반복하게 할 수 있음
       }
     });
 
-    // 2. 'postper' 명령어 전송
+    // 3. 장치(STM32)에 'postper' 명령어 전송
     await writeToPort(PORT_COMMANDS.postper);
 
-    // 3. 로딩 상태로 변경
+    // 4. 로딩 상태로 변경
     state = UIStateUsbPort.loading(
       availablePorts: state.availablePorts,
       connectedDevice: state.connectedDevice,
@@ -864,12 +862,26 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   Future<void> recheck() async {
+    // 1. 상태를 로딩으로 변경하여 UI에 스피너(Spinner) 표시
     state = UIStateUsbPort.loading(
       availablePorts: state.availablePorts,
       connectedDevice: state.connectedDevice,
       port: state.port,
       lastCommand: PORT_COMMANDS.recheck,
     );
+
+    // 2. 재시도 타이머 설정 (장치로부터 응답이 없을 경우 대비)
+    Future.delayed(Duration(seconds: Config.instance.isDebugMode ? 5 : 10), () {
+      // 10초 후에도 여전히 lastCommand가 recheck라면 응답을 못 받은 것임
+      if (state.lastCommand == PORT_COMMANDS.recheck) {
+        showScafold("No response for 'recheck', retrying...");
+        print("No response for 'recheck', retrying...");
+
+        recheck(); // 자기 자신을 다시 호출하여 다시 명령 전송
+      }
+    });
+
+    // 3. 장치(STM32)에 'recheck' 명령어 실제 전송
     return await writeToPort(PORT_COMMANDS.recheck);
   }
 
@@ -891,7 +903,7 @@ class SerialPortVM extends _$SerialPortVM {
       "Debug data injected: $data (Buffer: ${_receiveBuffer.toString()})",
     );
 
-    // 2. 실제 데이터가 들어왔을 때와 동일한 버퍼 처리 로직을 호출합니다.
+    // 2. 실제 데이터가 들어왔을 때와 동일한 버퍼 처리 로직을 호출
     _processBuffer();
   }
 
@@ -906,13 +918,13 @@ class SerialPortVM extends _$SerialPortVM {
     //   print("Debug Write Failed: Port not connected.");
     //   return;
     // }
-    // 2. 메시지에 '#' 종료 문자가 없으면 추가해줍니다.
+    // 2. 메시지에 '#' 종료 문자가 없으면 추가
     String commandToSend = msg.endsWith('#') ? msg : '$msg#';
 
-    // 3. 문자열을 Uint8List로 변환합니다.
+    // 3. 문자열을 Uint8List로 변환
     final dataToSend = Uint8List.fromList(commandToSend.codeUnits);
 
-    // 4. 실제 포트로 데이터를 씁니다.
+    // 4. 실제 포트로 데이터를 기록
     write(dataToSend);
   }
 

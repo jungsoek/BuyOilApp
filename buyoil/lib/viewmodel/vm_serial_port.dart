@@ -450,7 +450,7 @@ class SerialPortVM extends _$SerialPortVM {
 
     // 2. 데이터는 왔는데, 사용자의 성격(권한)에 따라 분기
     // fetchResult.driver가 boolean 타입이라고 가정할 때:
-    if (fetchResult.driver == true) {
+    if (fetchResult != null) {
       // 드라이버 권한 로직
       if (state is UIStateUsbPortConnected) {
         state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
@@ -459,14 +459,6 @@ class SerialPortVM extends _$SerialPortVM {
       }
       ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
 
-    } else {
-      // 일반 사용자 로직 (드라이버가 아님)
-      if (state is UIStateUsbPortConnected) {
-        state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
-        final packet = "${PORT_COMMANDS.open.command}#";
-        write(Uint8List.fromList(packet.codeUnits));
-      }
-      ref.read(routerProvider).goNamed(RouteGroup.Step2.name);
     }
   }
 
@@ -504,7 +496,7 @@ class SerialPortVM extends _$SerialPortVM {
     print('[RFID] driver=${fetchResult.driver}');
 
     // 2. 서버 결과 기반 분기 (드라이버 여부 확인)
-    if (fetchResult.driver == true) {
+    if (fetchResult != null) {
       // [승인] 드라이버 권한이 있는 경우
       if (state is UIStateUsbPortConnected) {
         state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
@@ -516,20 +508,6 @@ class SerialPortVM extends _$SerialPortVM {
       // 드라이버 화면 이동
       ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
 
-    } else {
-      // [비인가] 인증은 성공했으나 드라이버 권한이 없는 경우
-      print('[RFID] Unauthorized user');
-      if (context != null && context.mounted) {
-        showToastMessage(context, "권한이 없습니다");
-      }
-
-      // STM32 슬립 명령 전달
-      if (state is UIStateUsbPortConnected) {
-        final packet = "${PORT_COMMANDS.sleep.command}#";
-        write(Uint8List.fromList(packet.codeUnits));
-      }
-
-      // 필요하다면 여기서 다른 화면으로 보내거나 메인에 잔류
     }
   }
 

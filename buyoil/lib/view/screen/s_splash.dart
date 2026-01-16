@@ -77,6 +77,8 @@ class SplashState extends ConsumerState<SplashScreen> {
               top: 16,
               child: Row(
                 children: [
+                  Text("Version 0.1 // 260116Fri"),
+                  Text("Implement RFID Feature, Transmit Data to API, Fix error"),
                   Text("device ${ref.watch(serialPortVMProvider).connectedDevice?.deviceId ?? "not connected"}", style: Theme.of(context).textTheme.bodyLarge),
                   // SizedBox(width: 20,),
                   // OutlinedButton(

@@ -435,11 +435,8 @@ class SerialPortVM extends _$SerialPortVM {
 
     print('[PHONE] raw=$phoneCommand / clean=$cleanNumber');
 
-    // 서버 인증 (STM32와 무관)
-    // 서버 인증
     UserResult? fetchResult = await fetchUser(cleanNumber);
 
-    // 1. 아예 데이터가 없는 경우 (통신 오류 등)
     if (fetchResult == null) {
       print('[PHONE] Fetch fail');
       if (context != null && context.mounted) {
@@ -448,16 +445,14 @@ class SerialPortVM extends _$SerialPortVM {
       return;
     }
 
-    // 2. 데이터는 왔는데, 사용자의 성격(권한)에 따라 분기
-    // fetchResult.driver가 boolean 타입이라고 가정할 때:
     if (fetchResult != null) {
       // 드라이버 권한 로직
       if (state is UIStateUsbPortConnected) {
-        state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
-        final packet = "${PORT_COMMANDS.openB.command}#";
+        state = state.copyWith(lastCommand: PORT_COMMANDS.open);
+        final packet = "${PORT_COMMANDS.open.command}#";
         write(Uint8List.fromList(packet.codeUnits));
       }
-      ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
+      ref.read(routerProvider).goNamed(RouteGroup.Step2.name);
 
     }
   }
@@ -469,7 +464,6 @@ class SerialPortVM extends _$SerialPortVM {
       }) async {
     _resetInactivityTimer();
 
-    // RFID 정리
     String cleanNumber = rfidCommand;
     if (cleanNumber.startsWith('[VALID]')) {
       cleanNumber = cleanNumber.replaceFirst('[VALID]', '');
@@ -480,10 +474,8 @@ class SerialPortVM extends _$SerialPortVM {
 
     print('[RFID] raw=$rfidCommand / clean=$cleanNumber');
 
-    // 서버 인증 (STM32랑 무관)
     final fetchResult = await fetchUser(cleanNumber);
 
-    // 1. 서버 통신 자체가 실패하거나 데이터가 없는 경우
     if (fetchResult == null) {
       print('[RFID] Fetch fail');
       if (context != null && context.mounted) {
@@ -495,18 +487,16 @@ class SerialPortVM extends _$SerialPortVM {
     print('[RFID] userId=${fetchResult.userId}');
     print('[RFID] driver=${fetchResult.driver}');
 
-    // 2. 서버 결과 기반 분기 (드라이버 여부 확인)
     if (fetchResult != null) {
-      // [승인] 드라이버 권한이 있는 경우
       if (state is UIStateUsbPortConnected) {
-        state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
+        state = state.copyWith(lastCommand: PORT_COMMANDS.open);
 
-        final packet = "${PORT_COMMANDS.openB.command}#";
+        final packet = "${PORT_COMMANDS.open.command}#";
         write(Uint8List.fromList(packet.codeUnits));
       }
 
       // 드라이버 화면 이동
-      ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
+      ref.read(routerProvider).goNamed(RouteGroup.Step2.name);
 
     }
   }
@@ -526,14 +516,11 @@ class SerialPortVM extends _$SerialPortVM {
 
     final fetchResult = await fetchPostUCO(ucoJson);
 
-    if (fetchResult == true) {
+    if (fetchResult != null) {
       print('[POST_UCO] Fetch Success');
-    } else {
-      print('[POST_UCO] Fetch Fail');
-
-      if (context != null && context.mounted) {
-        showToastMessage(context, "UCO 데이터 전송 실패");
-      }
+      state = state.copyWith(
+        lastCommand: PORT_COMMANDS.postper,
+      );
     }
   }
 
@@ -554,7 +541,7 @@ class SerialPortVM extends _$SerialPortVM {
     // 서버 전송 (STM32와 무관)
     final fetchResult = await fetchPostPer(measuredData);
 
-    if (fetchResult == true) {
+    if (fetchResult != null) {
       print('[POST_PER] Fetch Success');
 
       // 서버 성공 → UI 상태만 갱신
@@ -564,12 +551,6 @@ class SerialPortVM extends _$SerialPortVM {
 
       // 필요 시 화면 이동
       // ref.read(routerProvider).goNamed(RouteGroup.Result.name);
-    } else {
-      print('[POST_PER] Fetch Fail');
-
-      if (context != null && context.mounted) {
-        showToastMessage(context, "서버 전송 실패");
-      }
     }
   }
 

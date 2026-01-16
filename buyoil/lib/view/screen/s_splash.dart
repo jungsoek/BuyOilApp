@@ -21,6 +21,22 @@ class SplashScreen extends ConsumerStatefulWidget {
 
 class SplashState extends ConsumerState<SplashScreen> {
   @override
+  void initState() {
+    super.initState();
+    // 1. 화면이 그려진 직후 자동 연결 시도
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoConnect();
+    });
+  }
+
+  void _autoConnect() {
+    final state = ref.read(serialPortVMProvider);
+    // 연결된 기기가 없고, 주변에 연결 가능한 기기가 감지되었다면 실행
+    if (state.connectedDevice == null) {
+      ref.read(serialPortVMProvider.notifier).connectPort(context: context);
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     ref.watch(serialPortVMProvider);
 
@@ -62,13 +78,13 @@ class SplashState extends ConsumerState<SplashScreen> {
               child: Row(
                 children: [
                   Text("device ${ref.watch(serialPortVMProvider).connectedDevice?.deviceId ?? "not connected"}", style: Theme.of(context).textTheme.bodyLarge),
-                  SizedBox(width: 20,),
-                  OutlinedButton(
-                    onPressed: () {
-                      ref.watch(serialPortVMProvider.notifier).connectPort(context: context);
-                    },
-                    child: Text("Connect Port[${ref.watch(serialPortVMProvider).availablePorts.length}]", style: Theme.of(context).textTheme.labelLarge,)
-                  ),
+                  // SizedBox(width: 20,),
+                  // OutlinedButton(
+                  //   onPressed: () {
+                  //     ref.watch(serialPortVMProvider.notifier).connectPort(context: context);
+                  //   },
+                  //   child: Text("Connect Port[${ref.watch(serialPortVMProvider).availablePorts.length}]", style: Theme.of(context).textTheme.labelLarge,)
+                  // ),
                 ],
               )
             ),

@@ -436,41 +436,36 @@ class SerialPortVM extends _$SerialPortVM {
     print('[PHONE] raw=$phoneCommand / clean=$cleanNumber');
 
     // 서버 인증 (STM32와 무관)
-    final fetchResult = await fetchUser(cleanNumber);
+    // 서버 인증
+    UserResult? fetchResult = await fetchUser(cleanNumber);
 
+    // 1. 아예 데이터가 없는 경우 (통신 오류 등)
     if (fetchResult == null) {
       print('[PHONE] Fetch fail');
       if (context != null && context.mounted) {
         showToastMessage(context, "인증 실패");
       }
-      return; // STM32 아무것도 안 보냄
+      return;
     }
 
-    print('[PHONE] userId=${fetchResult.userId}');
-    print('[PHONE] driver=${fetchResult.driver}');
-
-    // 서버 결과 기반 분기
-    if (fetchResult != null) {
-      // 드라이버 권한
+    // 2. 데이터는 왔는데, 사용자의 성격(권한)에 따라 분기
+    // fetchResult.driver가 boolean 타입이라고 가정할 때:
+    if (fetchResult.driver == true) {
+      // 드라이버 권한 로직
       if (state is UIStateUsbPortConnected) {
         state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
-
         final packet = "${PORT_COMMANDS.openB.command}#";
         write(Uint8List.fromList(packet.codeUnits));
       }
-
-      // 드라이버 화면 이동
       ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
+
     } else {
-      // 일반 사용자 or 비인가
+      // 일반 사용자 로직 (드라이버가 아님)
       if (state is UIStateUsbPortConnected) {
         state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
-
         final packet = "${PORT_COMMANDS.open.command}#";
         write(Uint8List.fromList(packet.codeUnits));
       }
-
-      // 일반 사용자 흐름 (다음 스텝 이동)
       ref.read(routerProvider).goNamed(RouteGroup.Step2.name);
     }
   }
@@ -496,20 +491,21 @@ class SerialPortVM extends _$SerialPortVM {
     // 서버 인증 (STM32랑 무관)
     final fetchResult = await fetchUser(cleanNumber);
 
+    // 1. 서버 통신 자체가 실패하거나 데이터가 없는 경우
     if (fetchResult == null) {
       print('[RFID] Fetch fail');
       if (context != null && context.mounted) {
         showToastMessage(context, "인증 실패");
       }
-      return; // 여기서 종료 (STM32 아무것도 안 보냄)
+      return; // 여기서 종료
     }
 
     print('[RFID] userId=${fetchResult.userId}');
     print('[RFID] driver=${fetchResult.driver}');
 
-    // 서버 결과 기반 분기
-    if (fetchResult != null) {
-      // 승인 → STM32에 "행동"만 보냄
+    // 2. 서버 결과 기반 분기 (드라이버 여부 확인)
+    if (fetchResult.driver == true) {
+      // [승인] 드라이버 권한이 있는 경우
       if (state is UIStateUsbPortConnected) {
         state = state.copyWith(lastCommand: PORT_COMMANDS.openB);
 
@@ -517,19 +513,23 @@ class SerialPortVM extends _$SerialPortVM {
         write(Uint8List.fromList(packet.codeUnits));
       }
 
-      // 화면 이동
+      // 드라이버 화면 이동
       ref.read(routerProvider).goNamed(RouteGroup.Driver.name);
+
     } else {
-      // 비인가
+      // [비인가] 인증은 성공했으나 드라이버 권한이 없는 경우
+      print('[RFID] Unauthorized user');
       if (context != null && context.mounted) {
         showToastMessage(context, "권한이 없습니다");
       }
 
-      // 필요 시 STM32 슬립
+      // STM32 슬립 명령 전달
       if (state is UIStateUsbPortConnected) {
         final packet = "${PORT_COMMANDS.sleep.command}#";
         write(Uint8List.fromList(packet.codeUnits));
       }
+
+      // 필요하다면 여기서 다른 화면으로 보내거나 메인에 잔류
     }
   }
 
@@ -597,70 +597,185 @@ class SerialPortVM extends _$SerialPortVM {
 
 
   // 포트에서 받은 값 처리
+  // 직전 명령에 따라서 동작 별도 처리
   void listenByPort(String receivedString) {
-    print("[UART][RX] $receivedString");
-
-    // PER 데이터
-    if (receivedString.startsWith("[PER]")) {
-      final json = receivedString
-          .replaceFirst("[PER]", "")
-          .trim();
-
-      writeToPortPostPer(json);
-      return;
+    if(!receivedString.startsWith(AppCommands.prefixAnswer)) {
+      showScafold("Prefix String is not [ANS]");
+      return ;
     }
-
-    // UCO 데이터
-    if (receivedString.startsWith("[UCO]")) {
-      final json = receivedString
-          .replaceFirst("[UCO]", "")
-          .trim();
-
-      writeToPortPostUCO(json);
-      return;
-    }
-
-    /* ================================
-   * ANS 응답 처리
-   * ================================ */
-    if (!receivedString.startsWith(AppCommands.prefixAnswer)) {
-      print('[WARN] Unknown packet: $receivedString');
-      return;
-    }
-
-    print("[UART][ANS] lastCommand=${state.lastCommand}, data=$receivedString");
-
-    /* ================================
-   * 기존 상태 머신
-   * ================================ */
-
-    // handshake
-    if (state.lastCommand == PORT_COMMANDS.handshake) {
-      if (receivedString == PORT_RESPONSES.ok.response) {
+    showScafold("[${state.lastCommand}]listenByPort: $receivedString#\n_receiveBuffer:${_receiveBuffer}");
+    print("[DEBUG] lastCommand  : ${state.lastCommand}");
+    print("[DEBUG] listenByPort : $receivedString");
+    // 최초 화면에서
+    if(state.lastCommand == PORT_COMMANDS.handshake) {
+      // OK 받으면
+      if(receivedString == PORT_RESPONSES.ok.response) {
+        // 전화번호 입력 페이지 이동
         ref.watch(routerProvider).goNamed(RouteGroup.Step1.name);
-      } else if (receivedString == PORT_RESPONSES.fail.response) {
+      } else if(receivedString == PORT_RESPONSES.fail.response) {
+        // 아니면 기본 화면 유지
         ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-      } else if (receivedString == PORT_RESPONSES.full.response) {
+      } else if(receivedString == PORT_RESPONSES.full.response) {
         ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
-        ref.read(toastProvider.notifier).showToast(
-          AppStrings.fullContainer,
-          duration: Duration(seconds: 5),
-        );
+        // 1. 5초간 팝업 띄우기
+        ref.read(toastProvider.notifier).showToast(AppStrings.fullContainer, duration: Duration(seconds: 5));
       }
+    }
+
+    if (receivedString == PORT_RESPONSES.fail.response) {
       state = state.copyWith(lastCommand: null);
+      // 2. 첫 페이지(Splash)로 이동
+      ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
+      // 1. 5초간 팝업 띄우기
+      ref.read(toastProvider.notifier).showToast(AppStrings.systemError, duration: Duration(seconds: 5));
       return;
     }
 
-    // OPEN
-    if (state.lastCommand == PORT_COMMANDS.open &&
-        receivedString == PORT_RESPONSES.ok.response) {
-      ref.watch(routerProvider).goNamed(RouteGroup.Step3.name);
+    // [ANS]STM_SLEEP# 응답을 받으면
+    if (receivedString == PORT_RESPONSES.stmSleep.response) {
+      showScafold("Received STM_SLEEP. Going to Splash.");
+      // 스플래시 화면으로 이동
+      ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
+      // lastCommand를 초기화하여 추가 동작 방지
       state = state.copyWith(lastCommand: null);
-      return;
+      return; // 이 응답 처리는 여기서 종료
     }
 
-    // 공통 OK 처리
-    if (receivedString == PORT_RESPONSES.ok.response) {
+    // 전화번호 send 응답이
+    if(state.lastCommand == PORT_COMMANDS.cmdPhone) {
+      // OK 받으면
+      if(receivedString == PORT_RESPONSES.ok.response) {
+        // 성공 시 실패 카운터 초기화
+        state = state.copyWith(resetFailCount: 0);
+
+        // page4(Step2) 오픈 화면 이동
+        ref.watch(routerProvider).goNamed(RouteGroup.Step2.name);
+      } else if(receivedString == PORT_RESPONSES.open.response) {
+        // 성공 시 실패 카운터 초기화
+        state = state.copyWith(resetFailCount: 0);
+        // Opening Door Screen 이동
+        ref.watch(routerProvider).goNamed(RouteGroup.OpeningDoor.name);
+      } else if(receivedString == PORT_RESPONSES.fail.response) {
+        // todo 변경사항 확인하기
+        ref.read(step1Provider.notifier).showErrorToast();
+      } else if(receivedString == PORT_RESPONSES.reject.response) {
+        final newFailCount = (state.resetFailCount ?? 0) + 1;
+        state = state.copyWith(resetFailCount: newFailCount);
+        if (newFailCount >= 5) {
+          // 1. 5회 실패: 첫 페이지로 복귀
+          ref.read(toastProvider.notifier).showToast(
+              AppStrings.accessDenied,
+              duration: Duration(seconds: 5));
+          ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
+          // 상태 초기화
+          state = state.copyWith(lastCommand: null, resetFailCount: 0);
+        } else {
+          // 2. 5회 미만 실패: 팝업 메시지 표시 (페이지는 그대로 유지)
+          ref.read(toastProvider.notifier).showToast(
+              AppStrings.accessDenied,
+              duration: Duration(seconds: 3)
+          );
+        }
+        // todo 변경사항 확인하기
+      } else if(receivedString == PORT_RESPONSES.notAuth.response) {
+        // *return “NOTAUTH” -> Please shows the proper driver code
+        // TODO
+      } else if(receivedString == PORT_RESPONSES.driverTrue.response) {
+        // send "[CMD]OPENB#" and shows driver's page.
+        writeToPort(PORT_COMMANDS.openB).whenComplete(() {
+          goToDriverPage();
+        });
+      } else if(receivedString == PORT_RESPONSES.driverFalse.response) {
+        ref.read(toastProvider.notifier).showToast(AppStrings.notAuthorized);
+        // send "[CMD]SLEEP#" and shows not authorized.
+        writeToPort(PORT_COMMANDS.sleep);
+      }
+    }
+
+    // Open 명령어
+    if(state.lastCommand == PORT_COMMANDS.open) {
+      // ok 응답 -> Close 화면 이동
+      if(receivedString == PORT_RESPONSES.ok.response) {
+        ref.watch(routerProvider).goNamed(RouteGroup.Step3.name);
+      }
+    }
+
+    // 'postper'
+    if (state.lastCommand == PORT_COMMANDS.postper) {
+      if (receivedString == PORT_RESPONSES.ok.response) {
+        // 1. postper에 대한 응답을 받으면 lastCommand를 초기화하여 재시도 타이머를 멈춤
+        state = state.copyWith(lastCommand: null);
+        // 1-1. 응답이 'OK'이면, 바로 'postData'를 전송
+        print("Received OK for 'postper', now sending 'postData'.");
+        showScafold("Received OK for 'postper', now sending 'postData'.");
+        // poster -> postData 로 이어지므로 마지막 명령어 자체 업데이트
+        state = state.copyWith(lastCommand: PORT_COMMANDS.postData);
+        okayNextStep(); // postData를 보내는 전용 함수 호출
+        return;
+      }
+    }
+
+    if(state.lastCommand == PORT_COMMANDS.postData) {
+      if (receivedString == PORT_RESPONSES.ok.response) {
+        // 2. postData에 대한 응답을 받으면 lastCommand를 초기화하여 재시도 타이머를 멈춤
+        state = state.copyWith(lastCommand: null);
+        // 2-1. 응답이 'OK'이면 모든 과정이 성공했으므로 스플래시 화면으로 이동
+        print("Received OK for 'postData'. Process complete.");
+        showScafold("Received OK for 'postData'. Process complete.");
+        ref.watch(routerProvider).goNamed(RouteGroup.Splash.name);
+      }
+    }
+
+    // Close 명령어
+    if(state.lastCommand == PORT_COMMANDS.close) {
+      // O, W, E 포맷이면
+      if(formatRegex.hasMatch(receivedString)) {
+        state = state.copyWith(lastCommand: null);
+        (double oil, double water) res = AppCommands.returnOilWaterFormat(receivedString);
+
+        // 초기화 후 Step4화면 재실행
+        if(state.connectedDevice != null && state.port != null) {
+          state = UIStateUsbPortConnected(
+            availablePorts: state.availablePorts,
+            connectedDevice: state.connectedDevice!,
+            port: state.port!,
+            lastCommand: null,
+          );
+        }
+
+        ref.read(routerProvider).goNamed(RouteGroup.Step4.name, queryParameters: {
+          "oil": "${res.$1}",
+          "water": "${res.$2}",
+        });
+      }
+    }
+
+    if(state.lastCommand == PORT_COMMANDS.recheck) {
+      // O, W, E 포맷이면
+      if(formatRegex.hasMatch(receivedString)) {
+        // 초기화 후 Step4화면 재실행
+        state = UIStateUsbPortConnected(
+          availablePorts: state.availablePorts,
+          connectedDevice: state.connectedDevice,
+          port: state.port,
+          lastCommand: null,
+        );
+
+        (double oil, double water) res = AppCommands.returnOilWaterFormat(receivedString);
+        // 초기화 후 Step4화면 재실행
+        print("recheck success: ${state.connectedDevice}/ ${state.port}");
+        ref.read(routerProvider).goNamed(RouteGroup.Step4.name, queryParameters: {
+          "oil": "${res.$1}",
+          "water": "${res.$2}",
+        });
+      }
+    }
+
+    // ok 명령 받은 경우 lastCommand 초기화
+    if(receivedString == PORT_RESPONSES.ok.response) {
+      if(state.lastCommand == PORT_COMMANDS.postData || state.lastCommand == PORT_COMMANDS.postper || state.lastCommand == PORT_COMMANDS.recheck) {
+        return;
+      }
       state = state.copyWith(lastCommand: null);
     }
   }
@@ -699,7 +814,6 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   Future<void> start() async {
-    okay();
     return await writeToPort(PORT_COMMANDS.handshake);
   }
 

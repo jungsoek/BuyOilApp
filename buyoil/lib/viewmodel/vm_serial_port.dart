@@ -417,7 +417,6 @@ class SerialPortVM extends _$SerialPortVM {
     UserResult? fetchResult = await fetchUser(cleanNumber);
 
     if (fetchResult != null) {
-      ref.read(serialPortVMProvider.notifier).showScafold("Processing writeToPortPhone() - fetchResult Branch"); // 화면에 토스트가 뜨는지 확인
       state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
       listenByPort(PORT_RESPONSES.ok.response);
       print('[Phone] userId=${fetchResult.userId}');
@@ -575,7 +574,7 @@ class SerialPortVM extends _$SerialPortVM {
     }
 
     // 전화번호 send 응답이
-    if(state.lastCommand == PORT_COMMANDS.cmdPhone) {
+    if(state.lastCommand == PORT_COMMANDS.cmdPhone || state.lastCommand == PORT_COMMANDS.cmdRFID) {
       // OK 받으면
       if(receivedString == PORT_RESPONSES.ok.response) {
         // 성공 시 실패 카운터 초기화

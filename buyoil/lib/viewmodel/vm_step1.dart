@@ -49,7 +49,9 @@ class Step1 extends _$Step1 {
 
     if (buttonText == 'V') {
       // 전화번호 전송 (기존 메서드 유지)
+      print('V button pressed! Current Phone: ${state.phoneNumber}'); // 로그 확인
       ref.read(serialPortVMProvider.notifier).sendPhoneNumber(state.phoneNumber);
+      ref.read(serialPortVMProvider.notifier).showScafold("Processing..."); // 화면에 토스트가 뜨는지 확인
       return;
     }
 

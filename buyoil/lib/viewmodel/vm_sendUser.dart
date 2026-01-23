@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../model/user_request.dart';
 import '../repository/user_repository.dart';
@@ -51,9 +52,6 @@ Future<UserResult?> fetchUser(String number) async {
     print('Error Exception: $e');
     return null;
   }
-
-  // 모든 if문을 통과하지 못했을 경우를 위해 마지막에도 null 반환
-  return null;
 }
 
 class UserResult {
@@ -71,5 +69,20 @@ class UserResult {
       driver: json['driver'],
     );
   }
+}
+
+Future<bool> checkRealInternetConnection() async {
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if(result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      print('인터넷 연결 성공(Ping 성공)');
+      return true;
+    }
+  } on SocketException catch(_) {
+    print('인터넷 연결 실패(서버에 도달할 수 없음)');
+    return false;
+  }
+
+  return false;
 }
 

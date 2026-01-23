@@ -29,7 +29,6 @@ class SerialPortVM extends _$SerialPortVM {
   final StringBuffer _receiveBuffer = StringBuffer();
   static const String _terminator = '#';
 
-  // final RegExp formatRegex = RegExp(r'^(\[ANS\])?O(\d+(\.\d+)?)W(\d+(\.\d+)?)E$');
   final RegExp formatRegex = RegExp(
     r'^(?:\[ANS\])?O\d+(\.\d+)?W\d+(\.\d+)?E#?$',
   );
@@ -94,26 +93,6 @@ class SerialPortVM extends _$SerialPortVM {
     }
 
     List<UsbDevice> devices = await UsbSerial.listDevices();
-
-    // // // 임시
-    // if (Config.instance.isDebugMode && devices.isEmpty) {
-    //   final List<UsbDevice> demoDevices = List.generate(
-    //     2,
-    //     (i) => UsbDevice(
-    //       // 실제 생성자 매개변수 순서와 타입에 맞게 수정
-    //       '/dev/ttyACM$i', // macOS/Linux 스타일의 장치 이름
-    //       1234 + i,
-    //       5678 + i,
-    //       'Select This Debug Device For Test',
-    //       'DemoCorp',
-    //       1000 + i,
-    //       'DEMO-SN-00${i + 1}',
-    //       1,
-    //     ),
-    //   );
-    //   devices.addAll(demoDevices);
-    //   print("Added 5 demo devices for debugging.");
-    // }
 
     state = state.copyWith(availablePorts: devices);
 
@@ -424,6 +403,12 @@ class SerialPortVM extends _$SerialPortVM {
       }) async {
     _resetInactivityTimer();
 
+    if(checkRealInternetConnection() == true) {
+      ref.read(serialPortVMProvider.notifier).showScafold("Processing writeToPortPhone() - ping : true"); // 화면에 토스트가 뜨는지 확인
+    } else {
+      ref.read(serialPortVMProvider.notifier).showScafold("Processing writeToPortPhone() - ping : false"); // 화면에 토스트가 뜨는지 확인
+    }
+
     // 전화번호 정리
     String cleanNumber = phoneCommand;
     if (cleanNumber.startsWith('[VALID]')) {
@@ -437,26 +422,26 @@ class SerialPortVM extends _$SerialPortVM {
 
     UserResult? fetchResult = await fetchUser(cleanNumber);
 
-    if (fetchResult == null) {
+    if (fetchResult != null) {
+      ref.read(serialPortVMProvider.notifier).showScafold("Processing writeToPortPhone() - fetchResult Branch"); // 화면에 토스트가 뜨는지 확인
+      state = state.copyWith(lastCommand: PORT_COMMANDS.cmdPhone);
+      listenByPort(PORT_RESPONSES.ok.response);
+      print('[Phone] userId=${fetchResult.userId}');
+      print('[Phone] driver=${fetchResult.driver}');
+      print("fetchResult 검증 ...");
+      print("STATE 검증 : ${state}");
+      print("STATE 검증 : ${state}");
+      String packet = "$phoneCommand#";
+      final dataToSend = Uint8List.fromList(packet.codeUnits);
+      write(dataToSend);
+    } else {
       print('[PHONE] Fetch fail');
       if (context != null && context.mounted) {
         showToastMessage(context, "인증 실패");
       }
       return;
     }
-
-    if (fetchResult != null) {
-      // 드라이버 권한 로직
-      if (state is UIStateUsbPortConnected) {
-        state = state.copyWith(lastCommand: PORT_COMMANDS.open);
-        final packet = "${PORT_COMMANDS.open.command}#";
-        write(Uint8List.fromList(packet.codeUnits));
-      }
-      ref.read(routerProvider).goNamed(RouteGroup.Step2.name);
-
-    }
   }
-
 
   Future<void> writeToPortRFID(
       String rfidCommand, {
@@ -476,7 +461,18 @@ class SerialPortVM extends _$SerialPortVM {
 
     final fetchResult = await fetchUser(cleanNumber);
 
-    if (fetchResult == null) {
+    if (fetchResult != null) {
+      state = state.copyWith(lastCommand: PORT_COMMANDS.cmdRFID);
+      listenByPort(PORT_RESPONSES.ok.response);
+      print('[RFID] userId=${fetchResult.userId}');
+      print('[RFID] driver=${fetchResult.driver}');
+      print("STATE 검증 : ${state}");
+      print("STATE 검증 : ${state}");
+      print("fetchResult 검증 ...");
+      String packet = "$rfidCommand#";
+      final dataToSend = Uint8List.fromList(packet.codeUnits);
+      write(dataToSend);
+    } else {
       print('[RFID] Fetch fail');
       if (context != null && context.mounted) {
         showToastMessage(context, "인증 실패");
@@ -484,21 +480,6 @@ class SerialPortVM extends _$SerialPortVM {
       return; // 여기서 종료
     }
 
-    print('[RFID] userId=${fetchResult.userId}');
-    print('[RFID] driver=${fetchResult.driver}');
-
-    if (fetchResult != null) {
-      if (state is UIStateUsbPortConnected) {
-        state = state.copyWith(lastCommand: PORT_COMMANDS.open);
-
-        final packet = "${PORT_COMMANDS.open.command}#";
-        write(Uint8List.fromList(packet.codeUnits));
-      }
-
-      // 드라이버 화면 이동
-      ref.read(routerProvider).goNamed(RouteGroup.Step2.name);
-
-    }
   }
 
   Future<void> writeToPortPostUCO(
@@ -521,6 +502,7 @@ class SerialPortVM extends _$SerialPortVM {
       state = state.copyWith(
         lastCommand: PORT_COMMANDS.postper,
       );
+      listenByPort(PORT_RESPONSES.ok.response);
     }
   }
 
@@ -548,9 +530,7 @@ class SerialPortVM extends _$SerialPortVM {
       state = state.copyWith(
         lastCommand: PORT_COMMANDS.postper,
       );
-
-      // 필요 시 화면 이동
-      // ref.read(routerProvider).goNamed(RouteGroup.Result.name);
+      listenByPort(PORT_RESPONSES.ok.response);
     }
   }
 
@@ -845,12 +825,14 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   Future<void> sendPhoneNumber(String phoneNumber) async {
+    ref.read(serialPortVMProvider.notifier).showScafold("Processing SendPhoneNumber()"); // 화면에 토스트가 뜨는지 확인
     return await writeToPortPhone(
       PORT_COMMANDS.getValidPhoneCommand(phoneNumber),
     );
   }
 
   Future<void> sendRFIDNumber(String uid) async {
+    ref.read(serialPortVMProvider.notifier).showScafold("Processing..."); // 화면에 토스트가 뜨는지 확인
     return await writeToPortRFID(PORT_COMMANDS.getValidRFIDCommand(uid));
   }
 

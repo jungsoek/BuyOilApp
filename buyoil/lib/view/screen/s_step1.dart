@@ -29,15 +29,10 @@ class Step1Screen extends ConsumerStatefulWidget {
 class Step1ScreenState extends ConsumerState<Step1Screen> {
 
   void _onRfidDetected(String uid) {
-    print('[RFID UID by _onRfidDetected]: $uid');
-    print('RAW UID: "$uid"');
-    print('Length: ${uid.length}');
-    for (final c in uid.codeUnits) {
-      print('0x${c.toRadixString(16)}');
-    }
+    final cleanUid = uid.trim();
 
-    if (uid.length == 10) {
-      ref.read(step1Provider.notifier).rfidAuthenticated(uid);
+    if (cleanUid.length >= 10) {
+      ref.read(step1Provider.notifier).rfidAuthenticated(cleanUid);
     }
   }
 
@@ -47,26 +42,29 @@ class Step1ScreenState extends ConsumerState<Step1Screen> {
     final state = ref.watch(step1Provider);
 
     return Scaffold(
-      body: Stack(
-        children: [
-          RfidKeyboardListener(onDetected: _onRfidDetected),
-          Column(
-            children: [
-              HeaderWidget(),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    StepNavWidget(currentStep: 1, totalSteps: 4),
-                    Expanded(child: Stack(children: [_body(context, state)])),
-                  ],
+      body: Focus(
+        autofocus: true,
+        onKey: (node, event) => KeyEventResult.ignored,
+        child: Stack(
+          children: [
+            RfidKeyboardListener(onDetected: _onRfidDetected),
+            Column(
+              children: [
+                HeaderWidget(),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      StepNavWidget(currentStep: 1, totalSteps: 4),
+                      Expanded(child: Stack(children: [_body(context, state)])),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
-
     );
   }
 

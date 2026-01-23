@@ -33,8 +33,8 @@ Future<bool> fetchPostPer(String measuredData) async {
     print('[fetchPostPer] status: ${response.statusCode}');
     return false;
   } catch (e, stack) {
-    debugPrint('[fetchPostPer] error: $e');
-    debugPrintStack(stackTrace: stack);
+    print(e);
+    print(stack);
     return false;
   }
 }
@@ -67,8 +67,8 @@ Future<bool> fetchPostPer_() async {
     print('[fetchPostPer] status: ${response.statusCode}');
     return false;
   } catch (e, stack) {
-    debugPrint('[fetchPostPer] error: $e');
-    debugPrintStack(stackTrace: stack);
+    print(e);
+    print(stack);
     return false;
   }
 }

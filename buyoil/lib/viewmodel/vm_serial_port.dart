@@ -403,12 +403,6 @@ class SerialPortVM extends _$SerialPortVM {
       }) async {
     _resetInactivityTimer();
 
-    if(checkRealInternetConnection() == true) {
-      ref.read(serialPortVMProvider.notifier).showScafold("Processing writeToPortPhone() - ping : true"); // 화면에 토스트가 뜨는지 확인
-    } else {
-      ref.read(serialPortVMProvider.notifier).showScafold("Processing writeToPortPhone() - ping : false"); // 화면에 토스트가 뜨는지 확인
-    }
-
     // 전화번호 정리
     String cleanNumber = phoneCommand;
     if (cleanNumber.startsWith('[VALID]')) {
@@ -825,15 +819,13 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   Future<void> sendPhoneNumber(String phoneNumber) async {
-    ref.read(serialPortVMProvider.notifier).showScafold("Processing SendPhoneNumber()"); // 화면에 토스트가 뜨는지 확인
     return await writeToPortPhone(
       PORT_COMMANDS.getValidPhoneCommand(phoneNumber),
     );
   }
 
   Future<void> sendRFIDNumber(String uid) async {
-    ref.read(serialPortVMProvider.notifier).showScafold("Processing..."); // 화면에 토스트가 뜨는지 확인
-    return await writeToPortRFID(PORT_COMMANDS.getValidRFIDCommand(uid));
+    return await writeToPortRFID(uid);
   }
 
   /// [DEBUG] 특정 응답을 받은 것처럼 시뮬레이션

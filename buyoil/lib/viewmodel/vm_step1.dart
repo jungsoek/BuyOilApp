@@ -1,5 +1,4 @@
 import 'package:buyoil/common/utils/show_toast.dart';
-import 'package:buyoil/viewmodel/vm_sendUser.dart';
 import 'package:buyoil/viewmodel/vm_serial_port.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -32,7 +31,6 @@ class Step1 extends _$Step1 {
     return;
   }
 
-
   /// 숫자 버튼 처리
   void pressedNumber(String buttonText) {
     if (buttonText == '<') {
@@ -51,7 +49,6 @@ class Step1 extends _$Step1 {
       // 전화번호 전송 (기존 메서드 유지)
       print('V button pressed! Current Phone: ${state.phoneNumber}'); // 로그 확인
       ref.read(serialPortVMProvider.notifier).sendPhoneNumber(state.phoneNumber);
-      ref.read(serialPortVMProvider.notifier).showScafold("Processing..."); // 화면에 토스트가 뜨는지 확인
       return;
     }
 

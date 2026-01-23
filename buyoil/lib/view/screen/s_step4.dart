@@ -132,8 +132,8 @@ class Step4ScreenState extends ConsumerState<Step4Screen> {
     return ElevatedButton(
       onPressed: () {
         ref.read(serialPortVMProvider.notifier).okay(
-          oil: widget.oil,
-          water: widget.water,
+          oil: oil,
+          water: water,
         );
       },
       style: ElevatedButton.styleFrom(

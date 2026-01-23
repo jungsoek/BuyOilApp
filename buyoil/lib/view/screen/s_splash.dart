@@ -11,7 +11,6 @@ import '../../common/app_styles.dart';
 import '../../config.dart';
 import '../widget/btn_to_connect_port.dart';
 
-
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -31,14 +30,19 @@ class SplashState extends ConsumerState<SplashScreen> {
 
   void _autoConnect() {
     final state = ref.read(serialPortVMProvider);
+
     // 연결된 기기가 없고, 주변에 연결 가능한 기기가 감지되었다면 실행
     if (state.connectedDevice == null) {
       ref.read(serialPortVMProvider.notifier).connectPort(context: context);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     ref.watch(serialPortVMProvider);
+
+    double water = 0.123;
+    double oil = 0.456;
 
     return Scaffold(
       body: Container(
@@ -58,46 +62,27 @@ class SplashState extends ConsumerState<SplashScreen> {
               bottom: 72, //20은 터치 영역 고려
               left: 0,
               right: 0,
-              child: Center(
-                child: _startButton(context),
-              )
+              child: Center(child: _startButton(context)),
             ),
-            Positioned(
-              right: 0,
-              top: 0,
-              child: _homeButton(context),
-            ),
-            Positioned(
-              left: 0,
-              top: 0,
-              child: _settingButton(context),
-            ),
-            if(Config.instance.isDebugMode) Positioned(
-              right: 120,
-              top: 16,
-              child: Row(
-                children: [
-                  Text("Version 0.1 // 260116Fri"),
-                  Text("Implement RFID Feature, Transmit Data to API, Fix error"),
-                  Text("device ${ref.watch(serialPortVMProvider).connectedDevice?.deviceId ?? "not connected"}", style: Theme.of(context).textTheme.bodyLarge),
-                  // SizedBox(width: 20,),
-                  // OutlinedButton(
-                  //   onPressed: () {
-                  //     ref.watch(serialPortVMProvider.notifier).connectPort(context: context);
-                  //   },
-                  //   child: Text("Connect Port[${ref.watch(serialPortVMProvider).availablePorts.length}]", style: Theme.of(context).textTheme.labelLarge,)
-                  // ),
-                ],
-              )
-            ),
-            Positioned(
-              left: 0,
-              bottom: 0,
-              child: _connectPortButton(context),
-            ),
+            Positioned(right: 0, top: 0, child: _homeButton(context)),
+            Positioned(left: 0, top: 0, child: _settingButton(context)),
+            if (Config.instance.isDebugMode)
+              Positioned(
+                right: 120,
+                top: 16,
+                child: Row(
+                  children: [
+                    Text(
+                      "device ${ref.watch(serialPortVMProvider).connectedDevice?.deviceId ?? "not connected"}",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              ),
+            Positioned(left: 0, bottom: 0, child: _connectPortButton(context)),
           ],
-        )
-      )
+        ),
+      ),
     );
   }
 
@@ -109,24 +94,21 @@ class SplashState extends ConsumerState<SplashScreen> {
           ref.read(serialPortVMProvider.notifier).start();
         },
         style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
-                return AppColors.PRIMARY.withAlpha(80); // 터치(pressed) 상태일 때 색
-              }
-              return AppColors.PRIMARY; // 기본 색
-            },
-          ),
+          foregroundColor: MaterialStateProperty.resolveWith<Color>((
+            Set<MaterialState> states,
+          ) {
+            if (states.contains(MaterialState.pressed)) {
+              return AppColors.PRIMARY.withAlpha(80); // 터치(pressed) 상태일 때 색
+            }
+            return AppColors.PRIMARY; // 기본 색
+          }),
           // 선택적으로 배경색도 바꿀 수 있음
           backgroundColor: WidgetStatePropertyAll(Colors.transparent),
         ),
-        child: Text(AppStrings.startButton.tr(), style: AppStyles.tsStart,),
+        child: Text(AppStrings.startButton.tr(), style: AppStyles.tsStart),
       ),
     );
-
   }
-
-
 
   Widget _settingButton(BuildContext context) {
     return ToSettingButton();

@@ -824,7 +824,7 @@ class SerialPortVM extends _$SerialPortVM {
   }
 
   Future<void> sendRFIDNumber(String uid) async {
-    return await writeToPortRFID(uid);
+    return await writeToPortRFID(PORT_COMMANDS.getValidPhoneCommand(uid));
   }
 
   /// [DEBUG] 특정 응답을 받은 것처럼 시뮬레이션

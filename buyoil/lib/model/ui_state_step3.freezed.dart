@@ -55,11 +55,12 @@ extension UIStateStep3Patterns on UIStateStep3 {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( UIStateStep3Init value)?  init,TResult Function( UIStateStep3CloseDoor value)?  closeDoor,TResult Function( UIStateStep3Completed value)?  completed,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( UIStateStep3Init value)?  init,TResult Function( UIStateStep3Loading value)?  loading,TResult Function( UIStateStep3CloseDoor value)?  closeDoor,TResult Function( UIStateStep3Completed value)?  completed,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case UIStateStep3Init() when init != null:
-return init(_that);case UIStateStep3CloseDoor() when closeDoor != null:
+return init(_that);case UIStateStep3Loading() when loading != null:
+return loading(_that);case UIStateStep3CloseDoor() when closeDoor != null:
 return closeDoor(_that);case UIStateStep3Completed() when completed != null:
 return completed(_that);case _:
   return orElse();
@@ -79,11 +80,12 @@ return completed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( UIStateStep3Init value)  init,required TResult Function( UIStateStep3CloseDoor value)  closeDoor,required TResult Function( UIStateStep3Completed value)  completed,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( UIStateStep3Init value)  init,required TResult Function( UIStateStep3Loading value)  loading,required TResult Function( UIStateStep3CloseDoor value)  closeDoor,required TResult Function( UIStateStep3Completed value)  completed,}){
 final _that = this;
 switch (_that) {
 case UIStateStep3Init():
-return init(_that);case UIStateStep3CloseDoor():
+return init(_that);case UIStateStep3Loading():
+return loading(_that);case UIStateStep3CloseDoor():
 return closeDoor(_that);case UIStateStep3Completed():
 return completed(_that);}
 }
@@ -99,11 +101,12 @@ return completed(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( UIStateStep3Init value)?  init,TResult? Function( UIStateStep3CloseDoor value)?  closeDoor,TResult? Function( UIStateStep3Completed value)?  completed,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( UIStateStep3Init value)?  init,TResult? Function( UIStateStep3Loading value)?  loading,TResult? Function( UIStateStep3CloseDoor value)?  closeDoor,TResult? Function( UIStateStep3Completed value)?  completed,}){
 final _that = this;
 switch (_that) {
 case UIStateStep3Init() when init != null:
-return init(_that);case UIStateStep3CloseDoor() when closeDoor != null:
+return init(_that);case UIStateStep3Loading() when loading != null:
+return loading(_that);case UIStateStep3CloseDoor() when closeDoor != null:
 return closeDoor(_that);case UIStateStep3Completed() when completed != null:
 return completed(_that);case _:
   return null;
@@ -122,10 +125,11 @@ return completed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  init,TResult Function()?  closeDoor,TResult Function()?  completed,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  init,TResult Function()?  loading,TResult Function()?  closeDoor,TResult Function()?  completed,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case UIStateStep3Init() when init != null:
-return init();case UIStateStep3CloseDoor() when closeDoor != null:
+return init();case UIStateStep3Loading() when loading != null:
+return loading();case UIStateStep3CloseDoor() when closeDoor != null:
 return closeDoor();case UIStateStep3Completed() when completed != null:
 return completed();case _:
   return orElse();
@@ -145,10 +149,11 @@ return completed();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  init,required TResult Function()  closeDoor,required TResult Function()  completed,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  init,required TResult Function()  loading,required TResult Function()  closeDoor,required TResult Function()  completed,}) {final _that = this;
 switch (_that) {
 case UIStateStep3Init():
-return init();case UIStateStep3CloseDoor():
+return init();case UIStateStep3Loading():
+return loading();case UIStateStep3CloseDoor():
 return closeDoor();case UIStateStep3Completed():
 return completed();}
 }
@@ -164,10 +169,11 @@ return completed();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  init,TResult? Function()?  closeDoor,TResult? Function()?  completed,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  init,TResult? Function()?  loading,TResult? Function()?  closeDoor,TResult? Function()?  completed,}) {final _that = this;
 switch (_that) {
 case UIStateStep3Init() when init != null:
-return init();case UIStateStep3CloseDoor() when closeDoor != null:
+return init();case UIStateStep3Loading() when loading != null:
+return loading();case UIStateStep3CloseDoor() when closeDoor != null:
 return closeDoor();case UIStateStep3Completed() when completed != null:
 return completed();case _:
   return null;
@@ -201,6 +207,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'UIStateStep3.init()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class UIStateStep3Loading implements UIStateStep3 {
+  const UIStateStep3Loading();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateStep3Loading);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'UIStateStep3.loading()';
 }
 
 

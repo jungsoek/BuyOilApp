@@ -39,13 +39,16 @@ class Step3ScreenState extends ConsumerState<Step3Screen> {
               init: () {
                 return _initBody();
               },
+              loading: () { // 추가된 로딩 상태
+                return _loadingBody();
+              },
               closeDoor: () {
                 return _closeDoorBody();
               },
               completed: () {
                 return Container();
-              })
-          )
+              }),
+          ),
         ],
       )
     );
@@ -97,4 +100,25 @@ class Step3ScreenState extends ConsumerState<Step3Screen> {
       color: AppColors.EFFDF6,
     );
   }
+}
+
+// 로딩 화면 위젯
+Widget _loadingBody() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const CircularProgressIndicator(
+          color: AppColors.PRIMARY,
+          strokeWidth: 6,
+        ),
+        const SizedBox(height: 20),
+        Text(
+          "문이 닫히고 있습니다...\n잠시만 기다려주세요.",
+          textAlign: TextAlign.center,
+          style: AppStyles.tsDoorOpeningText.copyWith(fontSize: 24), // 적절한 스타일 적용
+        ),
+      ],
+    ),
+  );
 }

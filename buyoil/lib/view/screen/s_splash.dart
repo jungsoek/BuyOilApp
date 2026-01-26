@@ -22,7 +22,6 @@ class SplashState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // 1. 화면이 그려진 직후 자동 연결 시도
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _autoConnect();
     });
@@ -64,14 +63,15 @@ class SplashState extends ConsumerState<SplashScreen> {
               right: 0,
               child: Center(child: _startButton(context)),
             ),
-            Positioned(right: 0, top: 0, child: _homeButton(context)),
-            Positioned(left: 0, top: 0, child: _settingButton(context)),
+            // Positioned(right: 0, top: 0, child: _homeButton(context)),
+            // Positioned(left: 0, top: 0, child: _settingButton(context)),
             if (Config.instance.isDebugMode)
               Positioned(
                 right: 120,
                 top: 16,
                 child: Row(
                   children: [
+                    SizedBox(height:10),
                     Text(
                       "device ${ref.watch(serialPortVMProvider).connectedDevice?.deviceId ?? "not connected"}",
                       style: Theme.of(context).textTheme.bodyLarge,
@@ -79,7 +79,7 @@ class SplashState extends ConsumerState<SplashScreen> {
                   ],
                 ),
               ),
-            Positioned(left: 0, bottom: 0, child: _connectPortButton(context)),
+            // Positioned(left: 0, bottom: 0, child: _connectPortButton(context)),
           ],
         ),
       ),

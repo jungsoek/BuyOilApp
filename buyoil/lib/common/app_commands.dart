@@ -128,6 +128,8 @@ class AppCommands {
       }
     }
 
+    print("Oil : ${oil}, Water : ${water}");
+
     return (oil, water);
   }
 

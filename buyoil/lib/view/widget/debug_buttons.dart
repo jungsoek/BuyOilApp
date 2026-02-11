@@ -29,7 +29,8 @@ class DebugBtnState extends ConsumerState<DebugButtons> {
             _btn(PORT_RESPONSES.reject),
             _btn(PORT_RESPONSES.ok),
             _btn(PORT_RESPONSES.full),
-            _btnString("[ANS]O5.55W6.56E#"),
+            _btnString("[ANS]O10.0W0.5E#"),
+            _btnTestReceive("[ANS]O12.34W45.67E#"),
             _btn(PORT_RESPONSES.driverTrue),
             _btn(PORT_RESPONSES.driverFalse),
             _btnString("[CMD]SLEEP#", toMCU:true),
@@ -81,6 +82,20 @@ class DebugBtnState extends ConsumerState<DebugButtons> {
       color: Colors.yellowAccent,
       child: Text("[V]   000000 phone V click"),
     ));
+  }
+
+  _btnTestReceive(String data) {
+    return TextButton(
+      onPressed: () {
+        // writeDebug가 아니라 listenDebug를 호출해야 합니다!
+        ref.read(serialPortVMProvider.notifier).listenDebug(data);
+      },
+      child: Container(
+        padding: EdgeInsets.all(10),
+        color: Colors.green, // 수신 시뮬레이션은 초록색으로 구분
+        child: Text("Simulate Receive: $data"),
+      ),
+    );
   }
 
 }

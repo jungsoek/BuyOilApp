@@ -11,7 +11,7 @@ sealed class UIStateUsbPort with _$UIStateUsbPort {
   const factory UIStateUsbPort.init({
     @Default([]) List<UsbDevice> availablePorts,
     UsbDevice? connectedDevice,
-    UsbPort? port,
+    dynamic port,
     PORT_COMMANDS? lastCommand,
     @Default(0) int resetFailCount,
   }) = UIStateUsbPortInit;
@@ -19,7 +19,7 @@ sealed class UIStateUsbPort with _$UIStateUsbPort {
   const factory UIStateUsbPort.connected({
     @Default([]) List<UsbDevice> availablePorts,
     required UsbDevice? connectedDevice,
-    required UsbPort? port,
+    dynamic port,
     PORT_COMMANDS? lastCommand,
     @Default(0) int resetFailCount,
   }) = UIStateUsbPortConnected;
@@ -27,7 +27,7 @@ sealed class UIStateUsbPort with _$UIStateUsbPort {
   const factory UIStateUsbPort.loading({
     @Default([]) List<UsbDevice> availablePorts,
     required UsbDevice? connectedDevice,
-    UsbPort? port,
+    dynamic port,
     PORT_COMMANDS? lastCommand,
     @Default(0) int resetFailCount,
   }) = UIStateUsbPortLoading;
@@ -35,7 +35,7 @@ sealed class UIStateUsbPort with _$UIStateUsbPort {
   const factory UIStateUsbPort.error({
     @Default([]) List<UsbDevice> availablePorts,
     UsbDevice? connectedDevice,
-    UsbPort? port,
+    dynamic port,
     required String errorMsg,
     PORT_COMMANDS? lastCommand,
     @Default(0) int resetFailCount,

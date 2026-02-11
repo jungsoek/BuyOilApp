@@ -10,7 +10,7 @@ import 'common/utils/toast/custom_toast.dart';
 import 'config.dart';
 
 Future<void> main() async {
-  Config(isDebugMode: false);
+  Config(isDebugMode: true);
 
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UIStateUsbPort {
 
- List<UsbDevice> get availablePorts; UsbDevice? get connectedDevice; UsbPort? get port; PORT_COMMANDS? get lastCommand; int get resetFailCount;
+ List<UsbDevice> get availablePorts; UsbDevice? get connectedDevice; dynamic get port; PORT_COMMANDS? get lastCommand; int get resetFailCount;
 /// Create a copy of UIStateUsbPort
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,12 +25,12 @@ $UIStateUsbPortCopyWith<UIStateUsbPort> get copyWith => _$UIStateUsbPortCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPort&&const DeepCollectionEquality().equals(other.availablePorts, availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&(identical(other.port, port) || other.port == port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPort&&const DeepCollectionEquality().equals(other.availablePorts, availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&const DeepCollectionEquality().equals(other.port, port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(availablePorts),connectedDevice,port,lastCommand,resetFailCount);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(availablePorts),connectedDevice,const DeepCollectionEquality().hash(port),lastCommand,resetFailCount);
 
 @override
 String toString() {
@@ -45,7 +45,7 @@ abstract mixin class $UIStateUsbPortCopyWith<$Res>  {
   factory $UIStateUsbPortCopyWith(UIStateUsbPort value, $Res Function(UIStateUsbPort) _then) = _$UIStateUsbPortCopyWithImpl;
 @useResult
 $Res call({
- List<UsbDevice> availablePorts, UsbDevice? connectedDevice, UsbPort? port, PORT_COMMANDS? lastCommand, int resetFailCount
+ List<UsbDevice> availablePorts, UsbDevice? connectedDevice, dynamic port, PORT_COMMANDS? lastCommand, int resetFailCount
 });
 
 
@@ -67,7 +67,7 @@ class _$UIStateUsbPortCopyWithImpl<$Res>
 availablePorts: null == availablePorts ? _self.availablePorts : availablePorts // ignore: cast_nullable_to_non_nullable
 as List<UsbDevice>,connectedDevice: freezed == connectedDevice ? _self.connectedDevice : connectedDevice // ignore: cast_nullable_to_non_nullable
 as UsbDevice?,port: freezed == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
-as UsbPort?,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
+as dynamic,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
 as PORT_COMMANDS?,resetFailCount: null == resetFailCount ? _self.resetFailCount : resetFailCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -160,7 +160,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  init,TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  connected,TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  loading,TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  String errorMsg,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  init,TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  connected,TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  loading,TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  String errorMsg,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case UIStateUsbPortInit() when init != null:
 return init(_that.availablePorts,_that.connectedDevice,_that.port,_that.lastCommand,_that.resetFailCount);case UIStateUsbPortConnected() when connected != null:
@@ -184,7 +184,7 @@ return error(_that.availablePorts,_that.connectedDevice,_that.port,_that.errorMs
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)  init,required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)  connected,required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)  loading,required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  String errorMsg,  PORT_COMMANDS? lastCommand,  int resetFailCount)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)  init,required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)  connected,required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)  loading,required TResult Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  String errorMsg,  PORT_COMMANDS? lastCommand,  int resetFailCount)  error,}) {final _that = this;
 switch (_that) {
 case UIStateUsbPortInit():
 return init(_that.availablePorts,_that.connectedDevice,_that.port,_that.lastCommand,_that.resetFailCount);case UIStateUsbPortConnected():
@@ -204,7 +204,7 @@ return error(_that.availablePorts,_that.connectedDevice,_that.port,_that.errorMs
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  init,TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  connected,TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  loading,TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  UsbPort? port,  String errorMsg,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  init,TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  connected,TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  loading,TResult? Function( List<UsbDevice> availablePorts,  UsbDevice? connectedDevice,  dynamic port,  String errorMsg,  PORT_COMMANDS? lastCommand,  int resetFailCount)?  error,}) {final _that = this;
 switch (_that) {
 case UIStateUsbPortInit() when init != null:
 return init(_that.availablePorts,_that.connectedDevice,_that.port,_that.lastCommand,_that.resetFailCount);case UIStateUsbPortConnected() when connected != null:
@@ -233,7 +233,7 @@ class UIStateUsbPortInit implements UIStateUsbPort {
 }
 
 @override final  UsbDevice? connectedDevice;
-@override final  UsbPort? port;
+@override final  dynamic port;
 @override final  PORT_COMMANDS? lastCommand;
 @override@JsonKey() final  int resetFailCount;
 
@@ -247,12 +247,12 @@ $UIStateUsbPortInitCopyWith<UIStateUsbPortInit> get copyWith => _$UIStateUsbPort
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortInit&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&(identical(other.port, port) || other.port == port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortInit&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&const DeepCollectionEquality().equals(other.port, port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,port,lastCommand,resetFailCount);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,const DeepCollectionEquality().hash(port),lastCommand,resetFailCount);
 
 @override
 String toString() {
@@ -267,7 +267,7 @@ abstract mixin class $UIStateUsbPortInitCopyWith<$Res> implements $UIStateUsbPor
   factory $UIStateUsbPortInitCopyWith(UIStateUsbPortInit value, $Res Function(UIStateUsbPortInit) _then) = _$UIStateUsbPortInitCopyWithImpl;
 @override @useResult
 $Res call({
- List<UsbDevice> availablePorts, UsbDevice? connectedDevice, UsbPort? port, PORT_COMMANDS? lastCommand, int resetFailCount
+ List<UsbDevice> availablePorts, UsbDevice? connectedDevice, dynamic port, PORT_COMMANDS? lastCommand, int resetFailCount
 });
 
 
@@ -289,7 +289,7 @@ class _$UIStateUsbPortInitCopyWithImpl<$Res>
 availablePorts: null == availablePorts ? _self._availablePorts : availablePorts // ignore: cast_nullable_to_non_nullable
 as List<UsbDevice>,connectedDevice: freezed == connectedDevice ? _self.connectedDevice : connectedDevice // ignore: cast_nullable_to_non_nullable
 as UsbDevice?,port: freezed == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
-as UsbPort?,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
+as dynamic,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
 as PORT_COMMANDS?,resetFailCount: null == resetFailCount ? _self.resetFailCount : resetFailCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -302,7 +302,7 @@ as int,
 
 
 class UIStateUsbPortConnected implements UIStateUsbPort {
-  const UIStateUsbPortConnected({final  List<UsbDevice> availablePorts = const [], required this.connectedDevice, required this.port, this.lastCommand, this.resetFailCount = 0}): _availablePorts = availablePorts;
+  const UIStateUsbPortConnected({final  List<UsbDevice> availablePorts = const [], required this.connectedDevice, this.port, this.lastCommand, this.resetFailCount = 0}): _availablePorts = availablePorts;
   
 
  final  List<UsbDevice> _availablePorts;
@@ -313,7 +313,7 @@ class UIStateUsbPortConnected implements UIStateUsbPort {
 }
 
 @override final  UsbDevice? connectedDevice;
-@override final  UsbPort? port;
+@override final  dynamic port;
 @override final  PORT_COMMANDS? lastCommand;
 @override@JsonKey() final  int resetFailCount;
 
@@ -327,12 +327,12 @@ $UIStateUsbPortConnectedCopyWith<UIStateUsbPortConnected> get copyWith => _$UISt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortConnected&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&(identical(other.port, port) || other.port == port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortConnected&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&const DeepCollectionEquality().equals(other.port, port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,port,lastCommand,resetFailCount);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,const DeepCollectionEquality().hash(port),lastCommand,resetFailCount);
 
 @override
 String toString() {
@@ -347,7 +347,7 @@ abstract mixin class $UIStateUsbPortConnectedCopyWith<$Res> implements $UIStateU
   factory $UIStateUsbPortConnectedCopyWith(UIStateUsbPortConnected value, $Res Function(UIStateUsbPortConnected) _then) = _$UIStateUsbPortConnectedCopyWithImpl;
 @override @useResult
 $Res call({
- List<UsbDevice> availablePorts, UsbDevice? connectedDevice, UsbPort? port, PORT_COMMANDS? lastCommand, int resetFailCount
+ List<UsbDevice> availablePorts, UsbDevice? connectedDevice, dynamic port, PORT_COMMANDS? lastCommand, int resetFailCount
 });
 
 
@@ -369,7 +369,7 @@ class _$UIStateUsbPortConnectedCopyWithImpl<$Res>
 availablePorts: null == availablePorts ? _self._availablePorts : availablePorts // ignore: cast_nullable_to_non_nullable
 as List<UsbDevice>,connectedDevice: freezed == connectedDevice ? _self.connectedDevice : connectedDevice // ignore: cast_nullable_to_non_nullable
 as UsbDevice?,port: freezed == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
-as UsbPort?,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
+as dynamic,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
 as PORT_COMMANDS?,resetFailCount: null == resetFailCount ? _self.resetFailCount : resetFailCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -393,7 +393,7 @@ class UIStateUsbPortLoading implements UIStateUsbPort {
 }
 
 @override final  UsbDevice? connectedDevice;
-@override final  UsbPort? port;
+@override final  dynamic port;
 @override final  PORT_COMMANDS? lastCommand;
 @override@JsonKey() final  int resetFailCount;
 
@@ -407,12 +407,12 @@ $UIStateUsbPortLoadingCopyWith<UIStateUsbPortLoading> get copyWith => _$UIStateU
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortLoading&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&(identical(other.port, port) || other.port == port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortLoading&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&const DeepCollectionEquality().equals(other.port, port)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,port,lastCommand,resetFailCount);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,const DeepCollectionEquality().hash(port),lastCommand,resetFailCount);
 
 @override
 String toString() {
@@ -427,7 +427,7 @@ abstract mixin class $UIStateUsbPortLoadingCopyWith<$Res> implements $UIStateUsb
   factory $UIStateUsbPortLoadingCopyWith(UIStateUsbPortLoading value, $Res Function(UIStateUsbPortLoading) _then) = _$UIStateUsbPortLoadingCopyWithImpl;
 @override @useResult
 $Res call({
- List<UsbDevice> availablePorts, UsbDevice? connectedDevice, UsbPort? port, PORT_COMMANDS? lastCommand, int resetFailCount
+ List<UsbDevice> availablePorts, UsbDevice? connectedDevice, dynamic port, PORT_COMMANDS? lastCommand, int resetFailCount
 });
 
 
@@ -449,7 +449,7 @@ class _$UIStateUsbPortLoadingCopyWithImpl<$Res>
 availablePorts: null == availablePorts ? _self._availablePorts : availablePorts // ignore: cast_nullable_to_non_nullable
 as List<UsbDevice>,connectedDevice: freezed == connectedDevice ? _self.connectedDevice : connectedDevice // ignore: cast_nullable_to_non_nullable
 as UsbDevice?,port: freezed == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
-as UsbPort?,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
+as dynamic,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
 as PORT_COMMANDS?,resetFailCount: null == resetFailCount ? _self.resetFailCount : resetFailCount // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -473,7 +473,7 @@ class UIStateUsbPortError implements UIStateUsbPort {
 }
 
 @override final  UsbDevice? connectedDevice;
-@override final  UsbPort? port;
+@override final  dynamic port;
  final  String errorMsg;
 @override final  PORT_COMMANDS? lastCommand;
 @override@JsonKey() final  int resetFailCount;
@@ -488,12 +488,12 @@ $UIStateUsbPortErrorCopyWith<UIStateUsbPortError> get copyWith => _$UIStateUsbPo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortError&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&(identical(other.port, port) || other.port == port)&&(identical(other.errorMsg, errorMsg) || other.errorMsg == errorMsg)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UIStateUsbPortError&&const DeepCollectionEquality().equals(other._availablePorts, _availablePorts)&&(identical(other.connectedDevice, connectedDevice) || other.connectedDevice == connectedDevice)&&const DeepCollectionEquality().equals(other.port, port)&&(identical(other.errorMsg, errorMsg) || other.errorMsg == errorMsg)&&(identical(other.lastCommand, lastCommand) || other.lastCommand == lastCommand)&&(identical(other.resetFailCount, resetFailCount) || other.resetFailCount == resetFailCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,port,errorMsg,lastCommand,resetFailCount);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_availablePorts),connectedDevice,const DeepCollectionEquality().hash(port),errorMsg,lastCommand,resetFailCount);
 
 @override
 String toString() {
@@ -508,7 +508,7 @@ abstract mixin class $UIStateUsbPortErrorCopyWith<$Res> implements $UIStateUsbPo
   factory $UIStateUsbPortErrorCopyWith(UIStateUsbPortError value, $Res Function(UIStateUsbPortError) _then) = _$UIStateUsbPortErrorCopyWithImpl;
 @override @useResult
 $Res call({
- List<UsbDevice> availablePorts, UsbDevice? connectedDevice, UsbPort? port, String errorMsg, PORT_COMMANDS? lastCommand, int resetFailCount
+ List<UsbDevice> availablePorts, UsbDevice? connectedDevice, dynamic port, String errorMsg, PORT_COMMANDS? lastCommand, int resetFailCount
 });
 
 
@@ -530,7 +530,7 @@ class _$UIStateUsbPortErrorCopyWithImpl<$Res>
 availablePorts: null == availablePorts ? _self._availablePorts : availablePorts // ignore: cast_nullable_to_non_nullable
 as List<UsbDevice>,connectedDevice: freezed == connectedDevice ? _self.connectedDevice : connectedDevice // ignore: cast_nullable_to_non_nullable
 as UsbDevice?,port: freezed == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
-as UsbPort?,errorMsg: null == errorMsg ? _self.errorMsg : errorMsg // ignore: cast_nullable_to_non_nullable
+as dynamic,errorMsg: null == errorMsg ? _self.errorMsg : errorMsg // ignore: cast_nullable_to_non_nullable
 as String,lastCommand: freezed == lastCommand ? _self.lastCommand : lastCommand // ignore: cast_nullable_to_non_nullable
 as PORT_COMMANDS?,resetFailCount: null == resetFailCount ? _self.resetFailCount : resetFailCount // ignore: cast_nullable_to_non_nullable
 as int,
